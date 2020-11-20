@@ -1,0 +1,87 @@
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <logger name="io.netty" level="info"/>
+
+    <logger name="deployments.ActiveFailoverDeployment" additivity="false">
+        <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+            <file>./log/deployments/ActiveFailoverDeployment.log</file>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+    </logger>
+
+    <logger name="deployments.ClusterDeployment" additivity="false">
+        <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+            <file>./log/deployments/ClusterDeployment.log</file>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+    </logger>
+
+    <logger name="deployments.ProxiedActiveFailoverDeployment" additivity="false">
+        <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+            <file>./log/deployments/ProxiedActiveFailoverDeployment.log</file>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+    </logger>
+
+    <logger name="deployments.ProxiedClusterDeployment" additivity="false">
+        <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+            <file>./log/deployments/ProxiedClusterDeployment.log</file>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+    </logger>
+
+    <logger name="deployments.ProxiedSingleServerDeployment" additivity="false">
+        <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+            <file>./log/deployments/ProxiedSingleServerDeployment.log</file>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+    </logger>
+
+    <logger name="deployments.SingleServerDeployment" additivity="false">
+        <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+            <file>./log/deployments/SingleServerDeployment.log</file>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+    </logger>
+
+    <logger name="deployments.SingleServerNoAuthDeployment" additivity="false">
+        <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+            <file>./log/deployments/SingleServerNoAuthDeployment.log</file>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+    </logger>
+
+    <logger name="deployments.SingleServerSslDeployment" additivity="false">
+        <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+            <file>./log/deployments/SingleServerSslDeployment.log</file>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+    </logger>
+
+</configuration>

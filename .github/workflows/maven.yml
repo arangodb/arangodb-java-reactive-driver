@@ -1,0 +1,93 @@
+name: Java CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+
+  verify:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        java-version:
+          - 11
+          - 14
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{matrix.java-version}}
+      - name: Package
+        run: mvn --no-transfer-progress -DskipTests=true -Dgpg.skip verify
+
+  test:
+
+    timeout-minutes: 30
+    needs: verify
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        java-version:
+          - 11
+          - 14
+        docker-img:
+          - docker.io/arangodb/arangodb:3.5.6
+          - docker.io/arangodb/enterprise:3.5.6
+          - docker.io/arangodb/arangodb:3.6.8
+          - docker.io/arangodb/enterprise:3.6.8
+          - docker.io/arangodb/arangodb:3.7.3
+          - docker.io/arangodb/enterprise:3.7.3
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{matrix.java-version}}
+      - name: Info
+        run: mvn -version
+      - name: Configure reuse containers
+        run: echo "testcontainers.reuse.enable=true" >> ~/.testcontainers.properties
+      - name: Test
+        run: mvn -e --no-transfer-progress test -DexcludedGroups="resiliency" -Dtest.docker.image="${{matrix.docker-img}}" -Darango.license.key="$ARANGO_LICENSE_KEY" -Dtestcontainers.reuse.enable=true
+        env:
+          ARANGO_LICENSE_KEY: ${{secrets.ARANGO_LICENSE_KEY}}
+      - name: Uploading containers logs
+        uses: actions/upload-artifact@v2
+        if: ${{ cancelled() || failure() }}
+        with:
+          name: containers-logs
+          path: arangodb-java-reactive-driver/log/deployments
+
+  sonar:
+
+    timeout-minutes: 30
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Info
+        run: mvn -version
+      - name: Analyze
+        run: mvn -e --no-transfer-progress clean verify sonar:sonar -Dgpg.skip -Dtest.docker.image="docker.io/arangodb/enterprise:3.7.2" -Darango.license.key="$ARANGO_LICENSE_KEY" -Dtestcontainers.reuse.enable=true
+        env:
+          ARANGO_LICENSE_KEY: ${{secrets.ARANGO_LICENSE_KEY}}
+          SONAR_LOGIN: ${{secrets.SONAR_LOGIN}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

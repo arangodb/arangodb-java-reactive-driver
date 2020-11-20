@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.0//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+    <suppress files=".*" checks="Javadoc"/>
+    <suppress files=".*" checks="TodoComment"/>
+    <suppress files=".*" checks="MagicNumber"/>
+    <suppress files=".*" checks="AvoidStarImport"/>
+    <suppress files=".*" checks="LineLength"/>
+    <suppress files="com.arangodb.reactive.connection.vst.Chunk" checks="HiddenField"/>
+    <suppress files="Immutable.*" checks=".*"/>
+    <suppress files=".*Builder" checks=".*"/>
+</suppressions>
