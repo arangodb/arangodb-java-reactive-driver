@@ -20,7 +20,9 @@
 
 package com.arangodb.reactive.api.reactive;
 
+import com.arangodb.reactive.api.reactive.impl.ArangoDBImpl;
 import com.arangodb.reactive.api.sync.ArangoDBSync;
+import com.arangodb.reactive.communication.CommunicationConfig;
 import reactor.core.publisher.Mono;
 
 /**
@@ -28,6 +30,10 @@ import reactor.core.publisher.Mono;
  * @author Mark Vollmary
  */
 public interface ArangoDB extends ArangoClient {
+
+    static ArangoDB create(final CommunicationConfig config) {
+        return new ArangoDBImpl(config);
+    }
 
     /**
      * @return the synchronous blocking version of this object

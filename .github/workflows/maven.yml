@@ -16,17 +16,13 @@ jobs:
 
     strategy:
       fail-fast: false
-      matrix:
-        java-version:
-          - 11
-          - 14
 
     steps:
       - uses: actions/checkout@v1
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: ${{matrix.java-version}}
+          java-version: 11
       - name: Package
         run: mvn --no-transfer-progress -DskipTests=true -Dgpg.skip verify
 
@@ -41,7 +37,6 @@ jobs:
       matrix:
         java-version:
           - 11
-          - 14
         docker-img:
           - docker.io/arangodb/arangodb:3.5.6
           - docker.io/arangodb/enterprise:3.5.6
