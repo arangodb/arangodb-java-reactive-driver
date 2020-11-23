@@ -21,7 +21,12 @@
 package com.arangodb.reactive.communication;
 
 
-import com.arangodb.reactive.connection.*;
+import com.arangodb.reactive.connection.ArangoConnection;
+import com.arangodb.reactive.connection.ArangoRequest;
+import com.arangodb.reactive.connection.ArangoResponse;
+import com.arangodb.reactive.connection.AuthenticationMethod;
+import com.arangodb.reactive.connection.ConnectionFactory;
+import com.arangodb.reactive.connection.HostDescription;
 import com.arangodb.reactive.exceptions.HostNotAvailableException;
 import com.arangodb.reactive.exceptions.NoHostsAvailableException;
 import org.slf4j.Logger;
@@ -30,7 +35,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;

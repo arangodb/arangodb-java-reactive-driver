@@ -63,6 +63,8 @@
                         <arg>--add-exports</arg>
                         <arg>jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
                     </compilerArgs>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
             <plugin>

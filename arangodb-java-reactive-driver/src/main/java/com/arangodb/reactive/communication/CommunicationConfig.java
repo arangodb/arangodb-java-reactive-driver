@@ -21,7 +21,11 @@
 package com.arangodb.reactive.communication;
 
 
-import com.arangodb.reactive.connection.*;
+import com.arangodb.reactive.connection.ArangoProtocol;
+import com.arangodb.reactive.connection.AuthenticationMethod;
+import com.arangodb.reactive.connection.ConnectionConfig;
+import com.arangodb.reactive.connection.ContentType;
+import com.arangodb.reactive.connection.HostDescription;
 import com.arangodb.reactive.entity.GenerateBuilder;
 import org.immutables.value.Value;
 

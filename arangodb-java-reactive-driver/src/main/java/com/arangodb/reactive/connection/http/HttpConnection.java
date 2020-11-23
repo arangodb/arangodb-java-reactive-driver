@@ -20,9 +20,17 @@
 
 package com.arangodb.reactive.connection.http;
 
-import com.arangodb.reactive.connection.*;
+import com.arangodb.reactive.connection.ArangoConnection;
+import com.arangodb.reactive.connection.ArangoRequest;
+import com.arangodb.reactive.connection.ArangoResponse;
+import com.arangodb.reactive.connection.AuthenticationMethod;
+import com.arangodb.reactive.connection.ConnectionConfig;
+import com.arangodb.reactive.connection.ContentType;
+import com.arangodb.reactive.connection.HostDescription;
+import com.arangodb.reactive.connection.IOUtils;
 import com.arangodb.reactive.connection.exceptions.ArangoConnectionAuthenticationException;
 import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -38,8 +46,6 @@ import reactor.netty.resources.ConnectionProvider;
 import javax.annotation.Nullable;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-
-import static io.netty.handler.codec.http.HttpHeaderNames.*;
 
 /**
  * @author Mark Vollmary
@@ -174,7 +180,7 @@ abstract class HttpConnection extends ArangoConnection {
                         .keepAlive(true)
                         .baseUrl((config.getUseSsl() ? "https://" : "http://") + host.getHost() + ":" + host.getPort())
                         .headers(headers -> getAuthentication().ifPresent(
-                                method -> headers.set(AUTHORIZATION, method.getHttpAuthorizationHeader())
+                                method -> headers.set(HttpHeaderNames.AUTHORIZATION, method.getHttpAuthorizationHeader())
                         ))
         );
     }
@@ -220,17 +226,17 @@ abstract class HttpConnection extends ArangoConnection {
     private HttpClient createHttpClient(final ArangoRequest request, final int bodyLength) {
         return cookieStore.addCookies(client)
                 .headers(headers -> {
-                    headers.set(CONTENT_LENGTH, bodyLength);
+                    headers.set(HttpHeaderNames.CONTENT_LENGTH, bodyLength);
                     if (config.getContentType() == ContentType.VPACK) {
-                        headers.set(ACCEPT, CONTENT_TYPE_VPACK);
+                        headers.set(HttpHeaderNames.ACCEPT, CONTENT_TYPE_VPACK);
                     } else if (config.getContentType() == ContentType.JSON) {
-                        headers.set(ACCEPT, "application/json");
+                        headers.set(HttpHeaderNames.ACCEPT, "application/json");
                     } else {
                         throw new IllegalArgumentException();
                     }
                     addHeaders(request, headers);
                     if (bodyLength > 0) {
-                        headers.set(CONTENT_TYPE, getContentType());
+                        headers.set(HttpHeaderNames.CONTENT_TYPE, getContentType());
                     }
                 });
     }
@@ -243,7 +249,7 @@ abstract class HttpConnection extends ArangoConnection {
                     byteBuf.release();
                     return buffer;
                 })
-                .map(buffer -> (ArangoResponse) ArangoResponse.builder()
+                .map(buffer -> ArangoResponse.builder()
                         .responseCode(resp.status().code())
                         .putAllMeta(resp.responseHeaders().entries().stream()
                                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue)))

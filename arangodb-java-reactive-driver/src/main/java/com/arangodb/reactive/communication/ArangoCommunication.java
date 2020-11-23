@@ -21,7 +21,11 @@
 package com.arangodb.reactive.communication;
 
 
-import com.arangodb.reactive.connection.*;
+import com.arangodb.reactive.connection.ArangoRequest;
+import com.arangodb.reactive.connection.ArangoResponse;
+import com.arangodb.reactive.connection.ConnectionConfig;
+import com.arangodb.reactive.connection.ConnectionFactoryImpl;
+import com.arangodb.reactive.connection.ConnectionSchedulerFactory;
 import reactor.core.publisher.Mono;
 
 /**

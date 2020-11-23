@@ -21,14 +21,13 @@
 package com.arangodb.reactive.connection;
 
 
+import com.arangodb.reactive.ArangoDefaults;
 import com.arangodb.reactive.entity.GenerateBuilder;
 import io.netty.handler.ssl.SslContext;
 import org.immutables.value.Value;
 
 import java.time.Duration;
 import java.util.Optional;
-
-import static com.arangodb.reactive.ArangoDefaults.*;
 
 /**
  * @author Michele Rastelli
@@ -72,7 +71,7 @@ public interface ConnectionConfig {
      */
     @Value.Default
     default Duration getTimeout() {
-        return Duration.ofMillis(DEFAULT_TIMEOUT);
+        return Duration.ofMillis(ArangoDefaults.DEFAULT_TIMEOUT);
     }
 
     /**
@@ -80,7 +79,7 @@ public interface ConnectionConfig {
      */
     @Value.Default
     default Duration getTtl() {
-        return Duration.ofMillis(DEFAULT_TTL);
+        return Duration.ofMillis(ArangoDefaults.DEFAULT_TTL);
     }
 
     /**
@@ -88,7 +87,7 @@ public interface ConnectionConfig {
      */
     @Value.Default
     default int getChunkSize() {
-        return CHUNK_DEFAULT_CONTENT_SIZE;
+        return ArangoDefaults.CHUNK_DEFAULT_CONTENT_SIZE;
     }
 
     /**

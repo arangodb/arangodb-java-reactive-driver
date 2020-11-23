@@ -20,7 +20,14 @@
 
 package com.arangodb.reactive.connection.vst;
 
-import com.arangodb.reactive.connection.*;
+import com.arangodb.reactive.connection.ArangoConnection;
+import com.arangodb.reactive.connection.ArangoRequest;
+import com.arangodb.reactive.connection.ArangoResponse;
+import com.arangodb.reactive.connection.AuthenticationMethod;
+import com.arangodb.reactive.connection.ConnectionConfig;
+import com.arangodb.reactive.connection.ConnectionSchedulerFactory;
+import com.arangodb.reactive.connection.HostDescription;
+import com.arangodb.reactive.connection.IOUtils;
 import com.arangodb.reactive.connection.exceptions.ArangoConnectionAuthenticationException;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpResponseStatus;

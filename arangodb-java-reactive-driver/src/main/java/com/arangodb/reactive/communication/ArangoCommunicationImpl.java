@@ -21,7 +21,11 @@
 package com.arangodb.reactive.communication;
 
 import com.arangodb.reactive.api.sync.ThreadConversation;
-import com.arangodb.reactive.connection.*;
+import com.arangodb.reactive.connection.ArangoRequest;
+import com.arangodb.reactive.connection.ArangoResponse;
+import com.arangodb.reactive.connection.AuthenticationMethod;
+import com.arangodb.reactive.connection.ConnectionFactory;
+import com.arangodb.reactive.connection.HostDescription;
 import com.arangodb.reactive.entity.model.ClusterEndpoints;
 import com.arangodb.reactive.entity.model.ErrorEntity;
 import com.arangodb.reactive.entity.serde.ArangoSerde;

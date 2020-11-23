@@ -21,7 +21,11 @@
 package com.arangodb.reactive.communication;
 
 
-import com.arangodb.reactive.connection.*;
+import com.arangodb.reactive.connection.ArangoRequest;
+import com.arangodb.reactive.connection.ArangoResponse;
+import com.arangodb.reactive.connection.AuthenticationMethod;
+import com.arangodb.reactive.connection.ConnectionFactory;
+import com.arangodb.reactive.connection.HostDescription;
 import reactor.core.publisher.Mono;
 
 import java.util.Set;
