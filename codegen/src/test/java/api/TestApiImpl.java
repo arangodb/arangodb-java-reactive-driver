@@ -29,6 +29,11 @@ import reactor.core.publisher.Mono;
 public class TestApiImpl implements TestApi {
 
     @Override
+    public String name() {
+        return "name";
+    }
+
+    @Override
     public Mono<Void> voidMethod() {
         return Mono.empty();
     }

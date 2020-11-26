@@ -31,6 +31,8 @@ import reactor.core.publisher.Mono;
 @GenerateSyncApi
 public interface TestApi {
 
+    String name();
+
     default Mono<String> defaultMethod() {
         return Mono.just("defaultMethod");
     }

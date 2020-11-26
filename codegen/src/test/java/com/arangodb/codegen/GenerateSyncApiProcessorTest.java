@@ -118,7 +118,7 @@ class GenerateSyncApiProcessorTest {
             } else if (reactiveResult instanceof Flux) {
                 expectedResult = ((Flux<?>) reactiveResult).collectList().block();
             } else {
-                throw new UnsupportedOperationException("Unsupported reactive return type.");
+                expectedResult = reactiveResult;
             }
 
             assertThat(syncResult).isEqualTo(expectedResult);
