@@ -1,6 +1,6 @@
 ![ArangoDB-Logo](https://docs.arangodb.com/assets/arangodb_logo_2016_inverted.png)
 
-# ArangoDB Reactive Java Driver
+# [UNDER DEVELOPMENT] ArangoDB Reactive Java Driver
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.arangodb/arangodb-java-reactive-driver/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.arangodb/arangodb-java-reactive-driver)
 [![Actions Status](https://github.com/arangodb/arangodb-java-reactive-driver/workflows/Java%20CI/badge.svg)](https://github.com/arangodb/arangodb-java-reactive-driver/actions)
