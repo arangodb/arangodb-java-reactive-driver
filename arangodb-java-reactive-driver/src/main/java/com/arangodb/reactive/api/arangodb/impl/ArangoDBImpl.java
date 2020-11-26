@@ -19,13 +19,13 @@
  */
 
 
-package com.arangodb.reactive.api.reactive.impl;
+package com.arangodb.reactive.api.arangodb.impl;
 
+import com.arangodb.reactive.api.arangodb.ArangoDB;
+import com.arangodb.reactive.api.arangodb.ArangoDBSync;
 import com.arangodb.reactive.api.database.DatabaseApi;
 import com.arangodb.reactive.api.database.impl.DatabaseApiImpl;
-import com.arangodb.reactive.api.reactive.ArangoDB;
-import com.arangodb.reactive.api.sync.ArangoDBSync;
-import com.arangodb.reactive.api.sync.impl.ArangoDBSyncImpl;
+import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
 import com.arangodb.reactive.communication.CommunicationConfig;
 import reactor.core.publisher.Mono;
 
@@ -41,6 +41,11 @@ public final class ArangoDBImpl extends ArangoClientImpl implements ArangoDB {
     @Override
     public ArangoDBSync sync() {
         return new ArangoDBSyncImpl(this);
+    }
+
+    @Override
+    public DatabaseApi db() {
+        return db("_system");
     }
 
     @Override

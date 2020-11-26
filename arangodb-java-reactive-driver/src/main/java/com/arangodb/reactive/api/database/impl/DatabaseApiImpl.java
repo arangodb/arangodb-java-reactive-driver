@@ -26,7 +26,7 @@ import com.arangodb.reactive.api.collection.impl.CollectionApiImpl;
 import com.arangodb.reactive.api.database.DatabaseApi;
 import com.arangodb.reactive.api.database.entity.DatabaseEntity;
 import com.arangodb.reactive.api.database.options.DatabaseCreateOptions;
-import com.arangodb.reactive.api.reactive.ArangoDB;
+import com.arangodb.reactive.api.arangodb.ArangoDB;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
 import com.arangodb.reactive.connection.ArangoRequest;
 import com.arangodb.reactive.connection.ArangoResponse;
@@ -80,10 +80,10 @@ public final class DatabaseApiImpl extends ArangoClientImpl implements DatabaseA
     }
 
     @Override
-    public Mono<DatabaseEntity> getDatabase(final String name) {
+    public Mono<DatabaseEntity> getDatabase(final String dbName) {
         return getCommunication().execute(
                 ArangoRequest.builder()
-                        .database(name)
+                        .database(dbName)
                         .requestType(ArangoRequest.RequestType.GET)
                         .path(PATH_API + "/current")
                         .build()
@@ -121,12 +121,12 @@ public final class DatabaseApiImpl extends ArangoClientImpl implements DatabaseA
     }
 
     @Override
-    public Mono<Void> dropDatabase(final String name) {
+    public Mono<Void> dropDatabase(final String dbName) {
         return getCommunication().execute(
                 ArangoRequest.builder()
                         .database(SYSTEM)
                         .requestType(ArangoRequest.RequestType.DELETE)
-                        .path(PATH_API + "/" + name)
+                        .path(PATH_API + "/" + dbName)
                         .build()
         ).then();
     }

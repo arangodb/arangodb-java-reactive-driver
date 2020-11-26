@@ -20,8 +20,8 @@
 
 package com.arangodb.reactive.api.utils;
 
-import com.arangodb.reactive.api.reactive.ArangoDB;
-import com.arangodb.reactive.api.reactive.impl.ArangoDBImpl;
+import com.arangodb.reactive.api.arangodb.ArangoDB;
+import com.arangodb.reactive.api.arangodb.impl.ArangoDBImpl;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 

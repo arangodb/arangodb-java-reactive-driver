@@ -18,11 +18,14 @@
  * Copyright holder is ArangoDB GmbH, Cologne, Germany
  */
 
-package com.arangodb.reactive.api.reactive;
+package com.arangodb.reactive.api.arangodb;
 
+import com.arangodb.codegen.GenerateSyncApi;
+import com.arangodb.codegen.SyncApiDelegator;
+import com.arangodb.codegen.SyncApiIgnore;
+import com.arangodb.reactive.api.arangodb.impl.ArangoDBImpl;
 import com.arangodb.reactive.api.database.DatabaseApi;
-import com.arangodb.reactive.api.reactive.impl.ArangoDBImpl;
-import com.arangodb.reactive.api.sync.ArangoDBSync;
+import com.arangodb.reactive.api.reactive.ArangoClient;
 import com.arangodb.reactive.communication.CommunicationConfig;
 import reactor.core.publisher.Mono;
 
@@ -30,6 +33,7 @@ import reactor.core.publisher.Mono;
  * @author Michele Rastelli
  * @author Mark Vollmary
  */
+@GenerateSyncApi
 public interface ArangoDB extends ArangoClient {
 
     static ArangoDB create(final CommunicationConfig config) {
@@ -39,6 +43,7 @@ public interface ArangoDB extends ArangoClient {
     /**
      * @return the synchronous blocking version of this object
      */
+    @SyncApiIgnore
     ArangoDBSync sync();
 
     /**
@@ -46,9 +51,8 @@ public interface ArangoDB extends ArangoClient {
      *
      * @return database handler
      */
-    default DatabaseApi db() {
-        return db("_system");
-    }
+    @SyncApiDelegator
+    DatabaseApi db();
 
     /**
      * Returns a {@link DatabaseApi} instance for the given database name.
@@ -56,6 +60,7 @@ public interface ArangoDB extends ArangoClient {
      * @param name Name of the database
      * @return database handler
      */
+    @SyncApiDelegator
     DatabaseApi db(String name);
 
     /**

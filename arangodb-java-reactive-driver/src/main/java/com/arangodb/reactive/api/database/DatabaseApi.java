@@ -22,11 +22,12 @@ package com.arangodb.reactive.api.database;
 
 
 import com.arangodb.codegen.GenerateSyncApi;
+import com.arangodb.codegen.SyncApiDelegator;
+import com.arangodb.reactive.api.arangodb.ArangoDB;
 import com.arangodb.reactive.api.collection.CollectionApi;
 import com.arangodb.reactive.api.database.entity.DatabaseEntity;
 import com.arangodb.reactive.api.database.options.DatabaseCreateOptions;
 import com.arangodb.reactive.api.reactive.ArangoClient;
-import com.arangodb.reactive.api.reactive.ArangoDB;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -44,11 +45,13 @@ public interface DatabaseApi extends ArangoClient {
     /**
      * @return main entry point for the ArangoDB driver
      */
+    @SyncApiDelegator
     ArangoDB arango();
 
     /**
      * @return CollectionApi for the current database
      */
+    @SyncApiDelegator
     CollectionApi collectionApi();
 
     /**

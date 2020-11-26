@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 
@@ -170,6 +171,8 @@ public class GenerateSyncApiProcessor extends AbstractProcessor {
         return e.getEnclosedElements().stream()
                 .filter(i -> i.getKind().equals(ElementKind.METHOD))
                 .map(i -> (MethodSymbol) i)
+                .filter(Predicate.not(MethodSymbol::isStatic))
+                .filter(i -> i.getAnnotation(SyncApiIgnore.class) == null)
                 .map(this::mapMethod)
                 .collect(Collectors.toList());
     }

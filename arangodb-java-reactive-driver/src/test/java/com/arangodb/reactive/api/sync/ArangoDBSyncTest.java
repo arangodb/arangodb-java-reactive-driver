@@ -20,6 +20,7 @@
 
 package com.arangodb.reactive.api.sync;
 
+import com.arangodb.reactive.api.arangodb.ArangoDBSync;
 import com.arangodb.reactive.api.utils.ArangoDBSyncProvider;
 import com.arangodb.reactive.api.utils.TestContext;
 import org.junit.jupiter.api.Tag;

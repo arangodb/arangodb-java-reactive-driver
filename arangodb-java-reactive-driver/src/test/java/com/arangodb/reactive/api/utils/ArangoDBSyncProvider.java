@@ -20,7 +20,7 @@
 
 package com.arangodb.reactive.api.utils;
 
-import com.arangodb.reactive.api.sync.ArangoDBSync;
+import com.arangodb.reactive.api.arangodb.ArangoDBSync;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 

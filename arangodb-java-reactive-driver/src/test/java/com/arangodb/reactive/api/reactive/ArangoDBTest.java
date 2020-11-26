@@ -20,6 +20,7 @@
 
 package com.arangodb.reactive.api.reactive;
 
+import com.arangodb.reactive.api.arangodb.ArangoDB;
 import com.arangodb.reactive.api.utils.ArangoDBProvider;
 import com.arangodb.reactive.api.utils.TestContext;
 import org.junit.jupiter.api.Tag;
