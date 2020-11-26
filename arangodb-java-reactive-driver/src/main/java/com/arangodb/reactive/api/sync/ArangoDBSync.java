@@ -20,26 +20,27 @@
 
 package com.arangodb.reactive.api.sync;
 
+import com.arangodb.reactive.api.database.DatabaseApiSync;
 import com.arangodb.reactive.api.reactive.ArangoDB;
 
 public interface ArangoDBSync extends ArangoClientSync<ArangoDB> {
 
     /**
-     * Returns a {@link ArangoDatabaseSync} instance for the {@code _system} database.
+     * Returns a {@link DatabaseApiSync} instance for the {@code _system} database.
      *
      * @return database handler
      */
-    default ArangoDatabaseSync db() {
+    default DatabaseApiSync db() {
         return db("_system");
     }
 
     /**
-     * Returns a {@link ArangoDatabaseSync} instance for the given database name.
+     * Returns a {@link DatabaseApiSync} instance for the given database name.
      *
      * @param name Name of the database
      * @return database handler
      */
-    ArangoDatabaseSync db(String name);
+    DatabaseApiSync db(String name);
 
     /**
      * Closes all connections and releases all the related resources.

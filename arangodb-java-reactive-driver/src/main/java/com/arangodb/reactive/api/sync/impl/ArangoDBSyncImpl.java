@@ -21,10 +21,9 @@
 
 package com.arangodb.reactive.api.sync.impl;
 
+import com.arangodb.reactive.api.database.DatabaseApiSync;
 import com.arangodb.reactive.api.reactive.ArangoDB;
-import com.arangodb.reactive.api.reactive.impl.ArangoDatabaseImpl;
 import com.arangodb.reactive.api.sync.ArangoDBSync;
-import com.arangodb.reactive.api.sync.ArangoDatabaseSync;
 
 /**
  * @author Michele Rastelli
@@ -37,8 +36,9 @@ public final class ArangoDBSyncImpl extends ClientSyncImpl<ArangoDB> implements 
     }
 
     @Override
-    public ArangoDatabaseSync db(final String name) {
-        return new ArangoDatabaseSyncImpl(new ArangoDatabaseImpl(reactive(), name));
+    public DatabaseApiSync db(final String name) {
+        throw new UnsupportedOperationException();
+//        return new DatabaseApiSyncImpl(new DatabaseApiImpl(reactive(), name));
     }
 
 }

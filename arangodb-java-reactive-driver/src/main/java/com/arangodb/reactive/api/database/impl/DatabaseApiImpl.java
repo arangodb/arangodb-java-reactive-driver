@@ -21,10 +21,12 @@
 package com.arangodb.reactive.api.database.impl;
 
 
+import com.arangodb.reactive.api.collection.CollectionApi;
+import com.arangodb.reactive.api.collection.impl.CollectionApiImpl;
 import com.arangodb.reactive.api.database.DatabaseApi;
 import com.arangodb.reactive.api.database.entity.DatabaseEntity;
 import com.arangodb.reactive.api.database.options.DatabaseCreateOptions;
-import com.arangodb.reactive.api.reactive.ArangoDatabase;
+import com.arangodb.reactive.api.reactive.ArangoDB;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
 import com.arangodb.reactive.connection.ArangoRequest;
 import com.arangodb.reactive.connection.ArangoResponse;
@@ -41,11 +43,28 @@ import static com.arangodb.reactive.api.util.ArangoResponseField.RESULT_JSON_POI
 public final class DatabaseApiImpl extends ArangoClientImpl implements DatabaseApi {
 
     private static final String PATH_API = "/_api/database";
-    private final String dbName;
+    private final ArangoDB arango;
+    private final String name;
 
-    public DatabaseApiImpl(final ArangoDatabase arangoDatabase) {
-        super((ArangoClientImpl) arangoDatabase);
-        dbName = arangoDatabase.name();
+    public DatabaseApiImpl(final ArangoDB arangoDB, final String dbName) {
+        super((ArangoClientImpl) arangoDB);
+        arango = arangoDB;
+        this.name = dbName;
+    }
+
+    @Override
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public ArangoDB arango() {
+        return arango;
+    }
+
+    @Override
+    public CollectionApi collectionApi() {
+        return new CollectionApiImpl(this);
     }
 
     @Override
@@ -91,7 +110,7 @@ public final class DatabaseApiImpl extends ArangoClientImpl implements DatabaseA
     public Flux<String> getAccessibleDatabases() {
         return getCommunication().execute(
                 ArangoRequest.builder()
-                        .database(dbName)
+                        .database(name)
                         .requestType(ArangoRequest.RequestType.GET)
                         .path(PATH_API + "/user")
                         .build()

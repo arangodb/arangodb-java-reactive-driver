@@ -22,9 +22,11 @@ package com.arangodb.reactive.api.database;
 
 
 import com.arangodb.codegen.GenerateSyncApi;
+import com.arangodb.reactive.api.collection.CollectionApi;
 import com.arangodb.reactive.api.database.entity.DatabaseEntity;
 import com.arangodb.reactive.api.database.options.DatabaseCreateOptions;
 import com.arangodb.reactive.api.reactive.ArangoClient;
+import com.arangodb.reactive.api.reactive.ArangoDB;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -33,6 +35,21 @@ import reactor.core.publisher.Mono;
  */
 @GenerateSyncApi
 public interface DatabaseApi extends ArangoClient {
+
+    /**
+     * @return database name
+     */
+    String name();
+
+    /**
+     * @return main entry point for the ArangoDB driver
+     */
+    ArangoDB arango();
+
+    /**
+     * @return CollectionApi for the current database
+     */
+    CollectionApi collectionApi();
 
     /**
      * Creates a new database with the given name.

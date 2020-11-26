@@ -60,7 +60,7 @@ public class ArangoApiTestClassExtension implements BeforeAllCallback, AfterAllC
                                 .stream()
                                 .map(ctxList -> new ArangoDBImpl(ctxList.get(0).getConfig()))
                 )
-                .flatMap(testClient -> action.apply(testClient.db().databaseApi()))
+                .flatMap(testClient -> action.apply(testClient.db()))
                 .then().block();
     }
 }

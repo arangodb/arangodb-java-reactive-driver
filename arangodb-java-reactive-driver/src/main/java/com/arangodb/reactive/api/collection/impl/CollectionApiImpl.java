@@ -32,7 +32,7 @@ import com.arangodb.reactive.api.collection.options.CollectionCreateParams;
 import com.arangodb.reactive.api.collection.options.CollectionDropParams;
 import com.arangodb.reactive.api.collection.options.CollectionRenameOptions;
 import com.arangodb.reactive.api.collection.options.CollectionsReadParams;
-import com.arangodb.reactive.api.reactive.ArangoDatabase;
+import com.arangodb.reactive.api.database.DatabaseApi;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
 import com.arangodb.reactive.connection.ArangoRequest;
 import com.arangodb.reactive.connection.ArangoResponse;
@@ -52,7 +52,7 @@ public final class CollectionApiImpl extends ArangoClientImpl implements Collect
 
     private final String dbName;
 
-    public CollectionApiImpl(final ArangoDatabase arangoDatabase) {
+    public CollectionApiImpl(final DatabaseApi arangoDatabase) {
         super((ArangoClientImpl) arangoDatabase);
         dbName = arangoDatabase.name();
     }

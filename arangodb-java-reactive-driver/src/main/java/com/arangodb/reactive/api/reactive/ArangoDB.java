@@ -20,6 +20,7 @@
 
 package com.arangodb.reactive.api.reactive;
 
+import com.arangodb.reactive.api.database.DatabaseApi;
 import com.arangodb.reactive.api.reactive.impl.ArangoDBImpl;
 import com.arangodb.reactive.api.sync.ArangoDBSync;
 import com.arangodb.reactive.communication.CommunicationConfig;
@@ -41,21 +42,21 @@ public interface ArangoDB extends ArangoClient {
     ArangoDBSync sync();
 
     /**
-     * Returns a {@link ArangoDatabase} instance for the {@code _system} database.
+     * Returns a {@link DatabaseApi} instance for the {@code _system} database.
      *
      * @return database handler
      */
-    default ArangoDatabase db() {
+    default DatabaseApi db() {
         return db("_system");
     }
 
     /**
-     * Returns a {@link ArangoDatabase} instance for the given database name.
+     * Returns a {@link DatabaseApi} instance for the given database name.
      *
      * @param name Name of the database
      * @return database handler
      */
-    ArangoDatabase db(String name);
+    DatabaseApi db(String name);
 
     /**
      * Closes all connections and releases all the related resources.

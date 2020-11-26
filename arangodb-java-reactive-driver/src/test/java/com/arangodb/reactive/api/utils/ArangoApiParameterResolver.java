@@ -25,8 +25,6 @@ import com.arangodb.reactive.api.collection.CollectionApiSync;
 import com.arangodb.reactive.api.database.DatabaseApi;
 import com.arangodb.reactive.api.database.DatabaseApiSync;
 import com.arangodb.reactive.api.reactive.ArangoDB;
-import com.arangodb.reactive.api.reactive.ArangoDatabase;
-import com.arangodb.reactive.api.sync.ArangoDatabaseSync;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
@@ -60,8 +58,8 @@ public class ArangoApiParameterResolver implements ParameterResolver {
     }
 
     private Object resolve(Class<?> clazz, ExtensionContext extensionContext) {
-        final ArangoDatabase db = testClient.db(extensionContext.getRequiredTestClass().getSimpleName());
-        final ArangoDatabaseSync dbSync = testClient.sync().db(extensionContext.getRequiredTestClass().getSimpleName());
+        final DatabaseApi db = testClient.db(extensionContext.getRequiredTestClass().getSimpleName());
+        final DatabaseApiSync dbSync = testClient.sync().db(extensionContext.getRequiredTestClass().getSimpleName());
         if (clazz == TestContext.class) {
             return testContext;
         } else if (clazz == CollectionApi.class) {
@@ -69,9 +67,9 @@ public class ArangoApiParameterResolver implements ParameterResolver {
         } else if (clazz == CollectionApiSync.class) {
             return dbSync.collectionApi();
         } else if (clazz == DatabaseApi.class) {
-            return db.databaseApi();
+            return db;
         } else if (clazz == DatabaseApiSync.class) {
-            return dbSync.databaseApi();
+            return dbSync;
         } else {
             return null;
         }

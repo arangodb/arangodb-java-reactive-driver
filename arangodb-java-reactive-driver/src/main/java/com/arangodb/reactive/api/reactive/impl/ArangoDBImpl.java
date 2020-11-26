@@ -21,8 +21,9 @@
 
 package com.arangodb.reactive.api.reactive.impl;
 
+import com.arangodb.reactive.api.database.DatabaseApi;
+import com.arangodb.reactive.api.database.impl.DatabaseApiImpl;
 import com.arangodb.reactive.api.reactive.ArangoDB;
-import com.arangodb.reactive.api.reactive.ArangoDatabase;
 import com.arangodb.reactive.api.sync.ArangoDBSync;
 import com.arangodb.reactive.api.sync.impl.ArangoDBSyncImpl;
 import com.arangodb.reactive.communication.CommunicationConfig;
@@ -43,8 +44,8 @@ public final class ArangoDBImpl extends ArangoClientImpl implements ArangoDB {
     }
 
     @Override
-    public ArangoDatabase db(final String name) {
-        return new ArangoDatabaseImpl(this, name);
+    public DatabaseApi db(final String name) {
+        return new DatabaseApiImpl(this, name);
     }
 
     @Override
