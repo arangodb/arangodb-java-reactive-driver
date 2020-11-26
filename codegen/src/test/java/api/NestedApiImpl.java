@@ -20,45 +20,14 @@
 
 package api;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 /**
  * @author Michele Rastelli
  */
-public class TestApiImpl implements TestApi {
-
-    private final NestedApi nested = new NestedApiImpl();
+public class NestedApiImpl implements NestedApi {
 
     @Override
     public String name() {
-        return "name";
+        return "nested";
     }
-
-    @Override
-    public NestedApi nested() {
-        return nested;
-    }
-
-    @Override
-    public Mono<Void> voidMethod() {
-        return Mono.empty();
-    }
-
-    @Override
-    public Flux<String> stringsCollectionMethod() {
-        return Flux.just("a", "b", "c");
-    }
-
-    @Override
-    public Mono<String> stringMethodWithStringArgument(String value) {
-        return Mono.just(value);
-    }
-
-    @Override
-    public Flux<String> stringsCollectionMethodWithStringArgument(String a, String b, String c) {
-        return Flux.just(a, b, c);
-    }
-
 
 }

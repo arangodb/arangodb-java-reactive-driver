@@ -1,6 +1,13 @@
 package com.arangodb.codegen;
 
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.code.Type;
 import reactor.core.publisher.Flux;
@@ -11,7 +18,11 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -127,6 +138,26 @@ public class GenerateSyncApiProcessor extends AbstractProcessor {
             specBuilder
                     .returns(ParameterizedTypeName.get(ClassName.get(List.class), TypeName.get(argumentType)))
                     .addStatement("return reactive().$L($L).collectList().block()", methodName, delegationArguments);
+        } else if (symbol.getAnnotation(SyncApiDelegator.class) != null) {
+
+            // sync interface delegator canonical name
+            String syncClassName = returnType.toString() + "Sync";
+
+            // sync implementation delegator canonical name
+            String[] returnTypeParts = syncClassName.split("\\.");
+            StringBuilder syncImplClassNameBuilder = new StringBuilder();
+            for (int i = 0; i < returnTypeParts.length - 1; i++) {
+                syncImplClassNameBuilder.append(returnTypeParts[i]);
+                syncImplClassNameBuilder.append(".");
+            }
+            syncImplClassNameBuilder.append("impl.");
+            syncImplClassNameBuilder.append(returnTypeParts[returnTypeParts.length - 1]);
+            syncImplClassNameBuilder.append("Impl");
+            String syncImplClassName = syncImplClassNameBuilder.toString();
+
+            specBuilder
+                    .returns(ClassName.bestGuess(syncClassName))
+                    .addStatement("return new $T(reactive().$L($L))", ClassName.bestGuess(syncImplClassName), methodName, delegationArguments);
         } else {
             specBuilder
                     .returns(TypeName.get(returnType))

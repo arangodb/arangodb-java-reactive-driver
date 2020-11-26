@@ -22,30 +22,11 @@ package api;
 
 
 import com.arangodb.codegen.GenerateSyncApi;
-import com.arangodb.codegen.SyncApiDelegator;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 /**
  * @author Michele Rastelli
  */
 @GenerateSyncApi
-public interface TestApi {
-
+public interface NestedApi {
     String name();
-
-    @SyncApiDelegator
-    NestedApi nested();
-
-    default Mono<String> defaultMethod() {
-        return Mono.just("defaultMethod");
-    }
-
-    Mono<Void> voidMethod();
-
-    Flux<String> stringsCollectionMethod();
-
-    Mono<String> stringMethodWithStringArgument(String value);
-
-    Flux<String> stringsCollectionMethodWithStringArgument(String a, String b, String c);
 }

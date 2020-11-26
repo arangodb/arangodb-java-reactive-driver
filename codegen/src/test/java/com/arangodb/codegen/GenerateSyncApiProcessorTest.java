@@ -21,10 +21,9 @@
 package com.arangodb.codegen;
 
 
+import api.NestedApi;
 import api.TestApi;
 import api.TestApiImpl;
-import api.TestClientSync;
-import api.TestClientSyncImpl;
 import com.sun.tools.javac.Main;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
@@ -70,8 +69,9 @@ class GenerateSyncApiProcessorTest {
                 .concat(
                         Stream.of("-d", SOURCE_DIR, "-proc:only",
                                 "-processor", GenerateSyncApiProcessor.class.getCanonicalName()),
-                        Stream.of(TestApi.class, TestClientSync.class, TestClientSyncImpl.class)
-                                .map(i -> "src/test/java/" + i.getCanonicalName().replace(".", "/") + ".java")
+                        Files.walk(Paths.get("src/test/java/api/"))
+                                .filter(i -> i.getFileName().toString().endsWith(".java"))
+                                .map(Path::toString)
                 )
                 .toArray(String[]::new)
         );
@@ -96,8 +96,10 @@ class GenerateSyncApiProcessorTest {
 
     @Test
     void loadGeneratedClasses() throws Exception {
-        loadTestApiSyncClass();
-        Class<?> testApiSyncImplClass = loadTestApiSyncImplClass();
+        loadSyncClass(NestedApi.class);
+        loadSyncClass(TestApi.class);
+        loadSyncImplClass(NestedApi.class);
+        Class<?> testApiSyncImplClass = loadSyncImplClass(TestApi.class);
 
         var reactiveInstance = new TestApiImpl();
         var syncInstance = testApiSyncImplClass
@@ -121,7 +123,15 @@ class GenerateSyncApiProcessorTest {
                 expectedResult = reactiveResult;
             }
 
-            assertThat(syncResult).isEqualTo(expectedResult);
+            if (reactiveMethod.getName().equals("nested")) {
+                assertThat(
+                        syncResult.getClass().getMethod("name").invoke(syncResult)
+                ).isEqualTo(
+                        expectedResult.getClass().getMethod("name").invoke(expectedResult)
+                );
+            } else {
+                assertThat(syncResult).isEqualTo(expectedResult);
+            }
         }
 
     }
@@ -132,14 +142,14 @@ class GenerateSyncApiProcessorTest {
                 .toArray();
     }
 
-    private Class<?> loadTestApiSyncClass() throws ClassNotFoundException {
-        String testApiSyncClassName = TestApi.class.getCanonicalName() + "Sync";
+    private Class<?> loadSyncClass(Class<?> clazz) throws ClassNotFoundException {
+        String testApiSyncClassName = clazz.getCanonicalName() + "Sync";
         return cl.loadClass(testApiSyncClassName);
     }
 
-    private Class<?> loadTestApiSyncImplClass() throws ClassNotFoundException {
-        String packageName = TestApi.class.getPackageName();
-        String testApiSyncImplClassName = packageName + ".impl." + TestApi.class.getSimpleName() + "SyncImpl";
+    private Class<?> loadSyncImplClass(Class<?> clazz) throws ClassNotFoundException {
+        String packageName = clazz.getPackageName();
+        String testApiSyncImplClassName = packageName + ".impl." + clazz.getSimpleName() + "SyncImpl";
         return cl.loadClass(testApiSyncImplClassName);
     }
 
