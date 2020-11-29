@@ -23,9 +23,9 @@ package com.arangodb.reactive.entity.serde;
 import com.arangodb.reactive.connection.ContentType;
 import com.arangodb.reactive.exceptions.SerdeException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
@@ -62,33 +62,23 @@ public abstract class ArangoSerde {
         );
     }
 
-    public final <T> byte[] serialize(final Object value, final Class<T> clazz) {
-        return wrapSerdeException(() ->
-                mapper.writerFor(clazz).writeValueAsBytes(value)
-        );
+    public final <T> T deserialize(final byte[] buffer, final Class<T> clazz) {
+        return deserialize(buffer, mapper.constructType(clazz));
     }
 
-    public final <T> T deserialize(final byte[] buffer, final Class<T> clazz) {
+    public final <T> T deserialize(final byte[] buffer, final JavaType clazz) {
         return wrapSerdeException(() ->
                 mapper.readerFor(clazz).readValue(buffer)
         );
     }
 
-    public final <T> List<T> deserializeList(final byte[] buffer, final Class<T> clazz) {
-        return wrapSerdeException(() ->
-                mapper.readerFor(clazz).<T>readValues(buffer).readAll()
-        );
+    public final <T> T deserializeAtJsonPointer(final String jsonPointer, final byte[] buffer, final Class<T> clazz) {
+        return deserializeAtJsonPointer(jsonPointer, buffer, mapper.constructType(clazz));
     }
 
-    public final <T> T deserializeAtJsonPointer(final String jsonPointer, final byte[] buffer, final Class<T> clazz) {
+    public final <T> T deserializeAtJsonPointer(final String jsonPointer, final byte[] buffer, final JavaType clazz) {
         return wrapSerdeException(() ->
                 mapper.readerFor(clazz).at(jsonPointer).readValue(buffer)
-        );
-    }
-
-    public final <T> List<T> deserializeListAtJsonPointer(final String jsonPointer, final byte[] buffer, final Class<T> clazz) {
-        return wrapSerdeException(() ->
-                mapper.readerFor(clazz).at(jsonPointer).<T>readValues(buffer).readAll()
         );
     }
 

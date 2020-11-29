@@ -20,15 +20,31 @@
 
 package com.arangodb.reactive.api.collection;
 
-import com.arangodb.reactive.api.collection.entity.*;
-import com.arangodb.reactive.api.collection.options.*;
+import com.arangodb.reactive.api.collection.entity.CollectionChecksumEntity;
+import com.arangodb.reactive.api.collection.entity.CollectionSchema;
+import com.arangodb.reactive.api.collection.entity.CollectionType;
+import com.arangodb.reactive.api.collection.entity.DetailedCollectionEntity;
+import com.arangodb.reactive.api.collection.entity.KeyType;
+import com.arangodb.reactive.api.collection.entity.ShardingStrategy;
+import com.arangodb.reactive.api.collection.entity.SimpleCollectionEntity;
+import com.arangodb.reactive.api.collection.options.CollectionChangePropertiesOptions;
+import com.arangodb.reactive.api.collection.options.CollectionCreateOptions;
+import com.arangodb.reactive.api.collection.options.CollectionCreateParams;
+import com.arangodb.reactive.api.collection.options.CollectionDropParams;
+import com.arangodb.reactive.api.collection.options.CollectionRenameOptions;
+import com.arangodb.reactive.api.collection.options.CollectionsReadParams;
+import com.arangodb.reactive.api.collection.options.KeyOptions;
 import com.arangodb.reactive.api.entity.ReplicationFactor;
 import com.arangodb.reactive.api.sync.ThreadConversation;
 import com.arangodb.reactive.api.utils.ArangoApiTest;
 import com.arangodb.reactive.api.utils.ArangoApiTestClass;
 import com.arangodb.reactive.api.utils.TestContext;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -249,7 +265,6 @@ class CollectionApiSyncTest {
         String name = "collection-" + UUID.randomUUID().toString();
         collectionApi.createCollection(CollectionCreateOptions.builder().name(name).build());
         Map<String, Object> collectionStatistics = collectionApi.getCollectionStatistics(name);
-        System.out.println(collectionStatistics);
         assertThat(collectionStatistics).isNotNull();
     }
 

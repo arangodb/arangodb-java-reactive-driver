@@ -36,17 +36,25 @@ import com.arangodb.reactive.api.database.DatabaseApi;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
 import com.arangodb.reactive.connection.ArangoRequest;
 import com.arangodb.reactive.connection.ArangoResponse;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static com.arangodb.reactive.api.util.ArangoResponseField.RESULT_JSON_POINTER;
+import static com.arangodb.reactive.entity.serde.SerdeTypes.STRING_LIST;
+import static com.arangodb.reactive.entity.serde.SerdeTypes.STRING_OBJECT_MAP;
 
 /**
  * @author Michele Rastelli
  */
 public final class CollectionApiImpl extends ArangoClientImpl implements CollectionApi {
+
+    private final JavaType simpleCollectionList = TypeFactory.defaultInstance().constructCollectionType(ArrayList.class, SimpleCollectionEntity.class);
 
     private static final String PATH_API = "/_api/collection";
 
@@ -72,7 +80,8 @@ public final class CollectionApiImpl extends ArangoClientImpl implements Collect
                                 .build()
                 )
                 .map(ArangoResponse::getBody)
-                .map(bytes -> getSerde().deserializeListAtJsonPointer(RESULT_JSON_POINTER, bytes, SimpleCollectionEntity.class))
+                .map(bytes -> getSerde()
+                        .<List<SimpleCollectionEntity>>deserializeAtJsonPointer(RESULT_JSON_POINTER, bytes, simpleCollectionList))
                 .flatMapMany(Flux::fromIterable);
     }
 
@@ -211,7 +220,7 @@ public final class CollectionApiImpl extends ArangoClientImpl implements Collect
                         .path(PATH_API + "/" + name + "/figures")
                         .build())
                 .map(ArangoResponse::getBody)
-                .map(bytes -> getSerde().deserializeAtJsonPointer("/figures", bytes, Map.class));
+                .map(bytes -> getSerde().deserializeAtJsonPointer("/figures", bytes, STRING_OBJECT_MAP));
     }
 
     @Override
@@ -292,7 +301,7 @@ public final class CollectionApiImpl extends ArangoClientImpl implements Collect
                         .path(PATH_API + "/" + name + "/shards")
                         .build())
                 .map(ArangoResponse::getBody)
-                .map(bytes -> getSerde().deserializeListAtJsonPointer("/shards", bytes, String.class))
+                .map(bytes -> getSerde().<List<String>>deserializeAtJsonPointer("/shards", bytes, STRING_LIST))
                 .flatMapMany(Flux::fromIterable);
     }
 

@@ -100,7 +100,7 @@ class SerializationTest {
 
     private <T> void testRoundTrip(T original, ContentType contentType, Class<? super T> clazz) {
         ArangoSerde serde = ArangoSerde.of(contentType);
-        byte[] serialized = serde.serialize(original, clazz);
+        byte[] serialized = serde.serialize(original);
         System.out.println(serde.toJsonString(serialized));
         Object deserialized = serde.deserialize(serialized, clazz);
         assertThat(deserialized).isEqualTo(original);
