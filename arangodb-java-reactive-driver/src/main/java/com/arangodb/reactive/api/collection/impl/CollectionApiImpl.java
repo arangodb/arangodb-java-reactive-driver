@@ -54,10 +54,8 @@ import static com.arangodb.reactive.entity.serde.SerdeTypes.STRING_OBJECT_MAP;
  */
 public final class CollectionApiImpl extends ArangoClientImpl implements CollectionApi {
 
-    private final JavaType simpleCollectionList = TypeFactory.defaultInstance().constructCollectionType(ArrayList.class, SimpleCollectionEntity.class);
-
     private static final String PATH_API = "/_api/collection";
-
+    private final JavaType simpleCollectionList = TypeFactory.defaultInstance().constructCollectionType(ArrayList.class, SimpleCollectionEntity.class);
     private final String dbName;
 
     public CollectionApiImpl(final DatabaseApi arangoDatabase) {

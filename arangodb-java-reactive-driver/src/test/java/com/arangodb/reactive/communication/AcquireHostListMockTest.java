@@ -21,7 +21,13 @@
 package com.arangodb.reactive.communication;
 
 
-import com.arangodb.reactive.connection.*;
+import com.arangodb.reactive.connection.ArangoConnection;
+import com.arangodb.reactive.connection.ArangoRequest;
+import com.arangodb.reactive.connection.ArangoResponse;
+import com.arangodb.reactive.connection.AuthenticationMethod;
+import com.arangodb.reactive.connection.ConnectionFactory;
+import com.arangodb.reactive.connection.ContentType;
+import com.arangodb.reactive.connection.HostDescription;
 import com.arangodb.reactive.entity.model.ClusterEndpointsEntry;
 import com.arangodb.reactive.entity.serde.ArangoSerde;
 import com.arangodb.reactive.exceptions.NoHostsAvailableException;

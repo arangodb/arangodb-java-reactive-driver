@@ -20,11 +20,11 @@
 
 package com.arangodb.reactive.api.utils;
 
+import com.arangodb.reactive.api.arangodb.ArangoDB;
 import com.arangodb.reactive.api.collection.CollectionApi;
 import com.arangodb.reactive.api.collection.CollectionApiSync;
 import com.arangodb.reactive.api.database.DatabaseApi;
 import com.arangodb.reactive.api.database.DatabaseApiSync;
-import com.arangodb.reactive.api.arangodb.ArangoDB;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;

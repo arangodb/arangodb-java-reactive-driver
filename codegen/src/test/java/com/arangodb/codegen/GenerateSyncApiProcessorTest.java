@@ -94,6 +94,12 @@ class GenerateSyncApiProcessorTest {
         FileUtils.deleteDirectory(new File(GENERATED_DIR));
     }
 
+    private static Object[] createStringArguments(Method m) {
+        return IntStream.range(0, m.getParameterCount())
+                .mapToObj(String::valueOf)
+                .toArray();
+    }
+
     @Test
     void loadGeneratedClasses() throws Exception {
         loadSyncClass(NestedApi.class);
@@ -134,12 +140,6 @@ class GenerateSyncApiProcessorTest {
             }
         }
 
-    }
-
-    private static Object[] createStringArguments(Method m) {
-        return IntStream.range(0, m.getParameterCount())
-                .mapToObj(String::valueOf)
-                .toArray();
     }
 
     private Class<?> loadSyncClass(Class<?> clazz) throws ClassNotFoundException {

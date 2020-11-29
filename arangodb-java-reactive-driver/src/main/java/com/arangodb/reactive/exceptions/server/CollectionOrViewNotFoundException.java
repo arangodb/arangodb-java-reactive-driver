@@ -27,10 +27,10 @@ import com.arangodb.reactive.entity.GeneratePackagePrivateBuilder;
  * ArangoServerException having:
  * <code>
  * {
- *      "code":404,
- *      "error":true,
- *      "errorMessage":"collection or view not found",
- *      "errorNum":1203
+ * "code":404,
+ * "error":true,
+ * "errorMessage":"collection or view not found",
+ * "errorNum":1203
  * }
  * </code>
  *

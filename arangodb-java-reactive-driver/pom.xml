@@ -98,7 +98,8 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <additionalOptions>-tag note:a:"Note:" -tag defaultValue:a:"Default value:" </additionalOptions>
+                            <additionalOptions>-tag note:a:"Note:" -tag defaultValue:a:"Default value:"
+                            </additionalOptions>
                             <excludePackageNames>com.arangodb.**.impl</excludePackageNames>
                         </configuration>
                     </execution>

@@ -20,7 +20,13 @@
 
 package com.arangodb.reactive.connection.vst;
 
-import com.arangodb.reactive.connection.*;
+import com.arangodb.reactive.connection.ArangoConnection;
+import com.arangodb.reactive.connection.ArangoProtocol;
+import com.arangodb.reactive.connection.ArangoResponse;
+import com.arangodb.reactive.connection.ConnectionConfig;
+import com.arangodb.reactive.connection.ConnectionFactoryImpl;
+import com.arangodb.reactive.connection.ConnectionTestUtils;
+import com.arangodb.reactive.connection.HostDescription;
 import deployments.ContainerDeployment;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

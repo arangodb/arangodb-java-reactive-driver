@@ -20,7 +20,12 @@
 
 package com.arangodb.reactive.connection.http;
 
-import com.arangodb.reactive.connection.*;
+import com.arangodb.reactive.connection.ArangoRequest;
+import com.arangodb.reactive.connection.ArangoResponse;
+import com.arangodb.reactive.connection.AuthenticationMethod;
+import com.arangodb.reactive.connection.ConnectionConfig;
+import com.arangodb.reactive.connection.ContentType;
+import com.arangodb.reactive.connection.HostDescription;
 import com.arangodb.velocypack.VPackBuilder;
 import com.arangodb.velocypack.VPackSlice;
 import com.arangodb.velocypack.ValueType;
