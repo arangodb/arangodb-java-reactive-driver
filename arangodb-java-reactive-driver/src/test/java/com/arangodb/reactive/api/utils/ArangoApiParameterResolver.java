@@ -21,8 +21,7 @@
 package com.arangodb.reactive.api.utils;
 
 import com.arangodb.reactive.api.arangodb.ArangoDB;
-import com.arangodb.reactive.api.collection.CollectionApi;
-import com.arangodb.reactive.api.collection.CollectionApiSync;
+import com.arangodb.reactive.api.arangodb.ArangoDBSync;
 import com.arangodb.reactive.api.database.DatabaseApi;
 import com.arangodb.reactive.api.database.DatabaseApiSync;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -62,10 +61,10 @@ public class ArangoApiParameterResolver implements ParameterResolver {
         final DatabaseApiSync dbSync = testClient.sync().db(extensionContext.getRequiredTestClass().getSimpleName());
         if (clazz == TestContext.class) {
             return testContext;
-        } else if (clazz == CollectionApi.class) {
-            return db.collectionApi();
-        } else if (clazz == CollectionApiSync.class) {
-            return dbSync.collectionApi();
+        } else if (clazz == ArangoDB.class) {
+            return testClient;
+        } else if (clazz == ArangoDBSync.class) {
+            return testClient.sync();
         } else if (clazz == DatabaseApi.class) {
             return db;
         } else if (clazz == DatabaseApiSync.class) {

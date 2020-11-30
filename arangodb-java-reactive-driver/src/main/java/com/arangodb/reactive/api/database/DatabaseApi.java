@@ -25,8 +25,14 @@ import com.arangodb.codegen.GenerateSyncApi;
 import com.arangodb.codegen.SyncApiDelegator;
 import com.arangodb.reactive.api.arangodb.ArangoDB;
 import com.arangodb.reactive.api.collection.CollectionApi;
+import com.arangodb.reactive.api.collection.entity.DetailedCollectionEntity;
+import com.arangodb.reactive.api.collection.entity.SimpleCollectionEntity;
+import com.arangodb.reactive.api.collection.options.CollectionCreateOptions;
+import com.arangodb.reactive.api.collection.options.CollectionCreateParams;
+import com.arangodb.reactive.api.collection.options.CollectionsReadParams;
 import com.arangodb.reactive.api.database.entity.DatabaseEntity;
 import com.arangodb.reactive.api.reactive.ArangoClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -47,10 +53,11 @@ public interface DatabaseApi extends ArangoClient {
     ArangoDB arangoDB();
 
     /**
+     * @param name Name of the collection
      * @return CollectionApi for the current database
      */
     @SyncApiDelegator
-    CollectionApi collectionApi();
+    CollectionApi collection(String name);
 
     /**
      * @return information about the database
@@ -68,4 +75,41 @@ public interface DatabaseApi extends ArangoClient {
      * Documentation</a>
      */
     Mono<Void> drop();
+
+    /**
+     * @return all non-system collections description
+     * @see <a href="https://www.arangodb.com/docs/stable/http/collection-getting.html#reads-all-collections">API
+     * Documentation</a>
+     */
+    Flux<SimpleCollectionEntity> getCollections();
+
+    /**
+     * @param options request options
+     * @return all collections description
+     * @see <a href="https://www.arangodb.com/docs/stable/http/collection-getting.html#reads-all-collections">API
+     * Documentation</a>
+     */
+    Flux<SimpleCollectionEntity> getCollections(CollectionsReadParams options);
+
+    /**
+     * Creates a collection for the given collection name and returns related information from the server.
+     *
+     * @param options request options
+     * @return information about the collection
+     * @see <a href="https://www.arangodb.com/docs/stable/http/collection-creating.html#create-collection">API
+     * Documentation</a>
+     */
+    Mono<DetailedCollectionEntity> createCollection(CollectionCreateOptions options);
+
+    /**
+     * Creates a collection for the given collection name and returns related information from the server.
+     *
+     * @param options request options
+     * @param params  request params
+     * @return information about the collection
+     * @see <a href="https://www.arangodb.com/docs/stable/http/collection-creating.html#create-collection">API
+     * Documentation</a>
+     */
+    Mono<DetailedCollectionEntity> createCollection(CollectionCreateOptions options, CollectionCreateParams params);
+
 }

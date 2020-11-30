@@ -23,16 +23,26 @@ package com.arangodb.reactive.api.database.impl;
 
 import com.arangodb.reactive.api.arangodb.ArangoDB;
 import com.arangodb.reactive.api.collection.CollectionApi;
+import com.arangodb.reactive.api.collection.entity.DetailedCollectionEntity;
+import com.arangodb.reactive.api.collection.entity.SimpleCollectionEntity;
 import com.arangodb.reactive.api.collection.impl.CollectionApiImpl;
+import com.arangodb.reactive.api.collection.options.CollectionCreateOptions;
+import com.arangodb.reactive.api.collection.options.CollectionCreateParams;
+import com.arangodb.reactive.api.collection.options.CollectionsReadParams;
 import com.arangodb.reactive.api.database.DatabaseApi;
 import com.arangodb.reactive.api.database.entity.DatabaseEntity;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
 import com.arangodb.reactive.api.util.ApiPath;
 import com.arangodb.reactive.connection.ArangoRequest;
 import com.arangodb.reactive.connection.ArangoResponse;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static com.arangodb.reactive.api.util.ArangoRequestParam.SYSTEM;
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.arangodb.reactive.api.util.ArangoResponseField.RESULT_JSON_POINTER;
 
 
@@ -40,6 +50,8 @@ import static com.arangodb.reactive.api.util.ArangoResponseField.RESULT_JSON_POI
  * @author Michele Rastelli
  */
 public final class DatabaseApiImpl extends ArangoClientImpl implements DatabaseApi {
+
+    private static final JavaType simpleCollectionList = TypeFactory.defaultInstance().constructCollectionType(ArrayList.class, SimpleCollectionEntity.class);
 
     private final ArangoDB arango;
     private final String name;
@@ -61,8 +73,8 @@ public final class DatabaseApiImpl extends ArangoClientImpl implements DatabaseA
     }
 
     @Override
-    public CollectionApi collectionApi() {
-        return new CollectionApiImpl(this);
+    public CollectionApi collection(final String name) {
+        return new CollectionApiImpl(this, name);
     }
 
     @Override
@@ -82,11 +94,67 @@ public final class DatabaseApiImpl extends ArangoClientImpl implements DatabaseA
     public Mono<Void> drop() {
         return getCommunication().execute(
                 ArangoRequest.builder()
-                        .database(SYSTEM)
+                        .database(arango.getAdminDB())
                         .requestType(ArangoRequest.RequestType.DELETE)
                         .path(ApiPath.DATABASE + "/" + name)
                         .build()
         ).then();
+    }
+
+    @Override
+    public Flux<SimpleCollectionEntity> getCollections() {
+        return getCollections(CollectionsReadParams.builder().excludeSystem(true).build());
+    }
+
+    @Override
+    public Flux<SimpleCollectionEntity> getCollections(final CollectionsReadParams params) {
+        return getCommunication()
+                .execute(
+                        ArangoRequest.builder()
+                                .database(name)
+                                .requestType(ArangoRequest.RequestType.GET)
+                                .path(ApiPath.COLLECTION)
+                                .putQueryParams(
+                                        CollectionsReadParams.EXCLUDE_SYSTEM_PARAM,
+                                        params.getExcludeSystem().map(String::valueOf)
+                                )
+                                .build()
+                )
+                .map(ArangoResponse::getBody)
+                .map(bytes -> getSerde()
+                        .<List<SimpleCollectionEntity>>deserializeAtJsonPointer(RESULT_JSON_POINTER, bytes, simpleCollectionList))
+                .flatMapMany(Flux::fromIterable);
+    }
+
+    @Override
+    public Mono<DetailedCollectionEntity> createCollection(CollectionCreateOptions options) {
+        return createCollection(options, CollectionCreateParams.builder().build());
+    }
+
+    @Override
+    public Mono<DetailedCollectionEntity> createCollection(
+            final CollectionCreateOptions options,
+            final CollectionCreateParams params
+    ) {
+        return getCommunication()
+                .execute(
+                        ArangoRequest.builder()
+                                .database(name)
+                                .requestType(ArangoRequest.RequestType.POST)
+                                .body(getSerde().serialize(options))
+                                .path(ApiPath.COLLECTION)
+                                .putQueryParams(
+                                        "enforceReplicationFactor",
+                                        params.getEnforceReplicationFactor().map(it -> it ? "1" : "0")
+                                )
+                                .putQueryParams(
+                                        "waitForSyncReplication",
+                                        params.getWaitForSyncReplication().map(it -> it ? "1" : "0")
+                                )
+                                .build()
+                )
+                .map(ArangoResponse::getBody)
+                .map(bytes -> getSerde().deserialize(bytes, DetailedCollectionEntity.class));
     }
 
 }

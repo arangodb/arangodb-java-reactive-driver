@@ -94,9 +94,7 @@ public interface ArangoDB extends ArangoClient {
      * @see <a href="https://www.arangodb.com/docs/stable/http/database-database-management.html#create-database">API
      * Documentation</a>
      */
-    default Mono<Void> createDatabase(String name) {
-        return createDatabase(DatabaseCreateOptions.builder().name(name).build());
-    }
+    Mono<Void> createDatabase(String name);
 
     /**
      * Creates a new database with the given name.

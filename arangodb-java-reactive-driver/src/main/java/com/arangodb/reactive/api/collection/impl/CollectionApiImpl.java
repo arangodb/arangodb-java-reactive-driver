@@ -27,25 +27,19 @@ import com.arangodb.reactive.api.collection.entity.DetailedCollectionEntity;
 import com.arangodb.reactive.api.collection.entity.SimpleCollectionEntity;
 import com.arangodb.reactive.api.collection.options.CollectionChangePropertiesOptions;
 import com.arangodb.reactive.api.collection.options.CollectionChecksumParams;
-import com.arangodb.reactive.api.collection.options.CollectionCreateOptions;
-import com.arangodb.reactive.api.collection.options.CollectionCreateParams;
 import com.arangodb.reactive.api.collection.options.CollectionDropParams;
 import com.arangodb.reactive.api.collection.options.CollectionRenameOptions;
-import com.arangodb.reactive.api.collection.options.CollectionsReadParams;
 import com.arangodb.reactive.api.database.DatabaseApi;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
+import com.arangodb.reactive.api.util.ApiPath;
 import com.arangodb.reactive.connection.ArangoRequest;
 import com.arangodb.reactive.connection.ArangoResponse;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.arangodb.reactive.api.util.ArangoResponseField.RESULT_JSON_POINTER;
 import static com.arangodb.reactive.entity.serde.SerdeTypes.STRING_LIST;
 import static com.arangodb.reactive.entity.serde.SerdeTypes.STRING_OBJECT_MAP;
 
@@ -54,69 +48,33 @@ import static com.arangodb.reactive.entity.serde.SerdeTypes.STRING_OBJECT_MAP;
  */
 public final class CollectionApiImpl extends ArangoClientImpl implements CollectionApi {
 
-    private static final String PATH_API = "/_api/collection";
-    private final JavaType simpleCollectionList = TypeFactory.defaultInstance().constructCollectionType(ArrayList.class, SimpleCollectionEntity.class);
     private final String dbName;
+    private final String colName;
 
-    public CollectionApiImpl(final DatabaseApi arangoDatabase) {
+    public CollectionApiImpl(final DatabaseApi arangoDatabase, final String collectionName) {
         super((ArangoClientImpl) arangoDatabase);
         dbName = arangoDatabase.getName();
+        colName = collectionName;
     }
 
     @Override
-    public Flux<SimpleCollectionEntity> getCollections(final CollectionsReadParams params) {
-        return getCommunication()
-                .execute(
-                        ArangoRequest.builder()
-                                .database(dbName)
-                                .requestType(ArangoRequest.RequestType.GET)
-                                .path(PATH_API)
-                                .putQueryParams(
-                                        CollectionsReadParams.EXCLUDE_SYSTEM_PARAM,
-                                        params.getExcludeSystem().map(String::valueOf)
-                                )
-                                .build()
-                )
-                .map(ArangoResponse::getBody)
-                .map(bytes -> getSerde()
-                        .<List<SimpleCollectionEntity>>deserializeAtJsonPointer(RESULT_JSON_POINTER, bytes, simpleCollectionList))
-                .flatMapMany(Flux::fromIterable);
+    public String getName() {
+        return colName;
     }
 
     @Override
-    public Mono<DetailedCollectionEntity> createCollection(
-            final CollectionCreateOptions options,
-            final CollectionCreateParams params
-    ) {
-        return getCommunication()
-                .execute(
-                        ArangoRequest.builder()
-                                .database(dbName)
-                                .requestType(ArangoRequest.RequestType.POST)
-                                .body(getSerde().serialize(options))
-                                .path(PATH_API)
-                                .putQueryParams(
-                                        "enforceReplicationFactor",
-                                        params.getEnforceReplicationFactor().map(it -> it ? "1" : "0")
-                                )
-                                .putQueryParams(
-                                        "waitForSyncReplication",
-                                        params.getWaitForSyncReplication().map(it -> it ? "1" : "0")
-                                )
-                                .build()
-                )
-                .map(ArangoResponse::getBody)
-                .map(bytes -> getSerde().deserialize(bytes, DetailedCollectionEntity.class));
+    public Mono<Void> drop() {
+        return drop(CollectionDropParams.builder().build());
     }
 
     @Override
-    public Mono<Void> dropCollection(final String name, final CollectionDropParams params) {
+    public Mono<Void> drop(final CollectionDropParams params) {
         return getCommunication()
                 .execute(
                         ArangoRequest.builder()
                                 .database(dbName)
                                 .requestType(ArangoRequest.RequestType.DELETE)
-                                .path(PATH_API + "/" + name)
+                                .path(ApiPath.COLLECTION + "/" + colName)
                                 .putQueryParams(
                                         CollectionDropParams.IS_SYSTEM_PARAM,
                                         params.isSystem().map(String::valueOf)
@@ -127,36 +85,36 @@ public final class CollectionApiImpl extends ArangoClientImpl implements Collect
     }
 
     @Override
-    public Mono<SimpleCollectionEntity> getCollection(final String name) {
+    public Mono<SimpleCollectionEntity> info() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
                         .database(dbName)
                         .requestType(ArangoRequest.RequestType.GET)
-                        .path(PATH_API + "/" + name)
+                        .path(ApiPath.COLLECTION + "/" + colName)
                         .build())
                 .map(ArangoResponse::getBody)
                 .map(bytes -> getSerde().deserialize(bytes, SimpleCollectionEntity.class));
     }
 
     @Override
-    public Mono<DetailedCollectionEntity> getCollectionProperties(final String name) {
+    public Mono<DetailedCollectionEntity> properties() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
                         .database(dbName)
                         .requestType(ArangoRequest.RequestType.GET)
-                        .path(PATH_API + "/" + name + "/properties")
+                        .path(ApiPath.COLLECTION + "/" + colName + "/properties")
                         .build())
                 .map(ArangoResponse::getBody)
                 .map(bytes -> getSerde().deserialize(bytes, DetailedCollectionEntity.class));
     }
 
     @Override
-    public Mono<DetailedCollectionEntity> changeCollectionProperties(final String name, final CollectionChangePropertiesOptions options) {
+    public Mono<DetailedCollectionEntity> changeProperties(final CollectionChangePropertiesOptions options) {
         return getCommunication()
                 .execute(ArangoRequest.builder()
                         .database(dbName)
                         .requestType(ArangoRequest.RequestType.PUT)
-                        .path(PATH_API + "/" + name + "/properties")
+                        .path(ApiPath.COLLECTION + "/" + colName + "/properties")
                         .body(getSerde().serialize(options))
                         .build())
                 .map(ArangoResponse::getBody)
@@ -164,12 +122,12 @@ public final class CollectionApiImpl extends ArangoClientImpl implements Collect
     }
 
     @Override
-    public Mono<SimpleCollectionEntity> renameCollection(final String name, final CollectionRenameOptions options) {
+    public Mono<SimpleCollectionEntity> rename(final CollectionRenameOptions options) {
         return getCommunication()
                 .execute(ArangoRequest.builder()
                         .database(dbName)
                         .requestType(ArangoRequest.RequestType.PUT)
-                        .path(PATH_API + "/" + name + "/rename")
+                        .path(ApiPath.COLLECTION + "/" + colName + "/rename")
                         .body(getSerde().serialize(options))
                         .build())
                 .map(ArangoResponse::getBody)
@@ -178,24 +136,29 @@ public final class CollectionApiImpl extends ArangoClientImpl implements Collect
 
 
     @Override
-    public Mono<Long> getCollectionCount(final String name) {
+    public Mono<Long> count() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
                         .database(dbName)
                         .requestType(ArangoRequest.RequestType.GET)
-                        .path(PATH_API + "/" + name + "/count")
+                        .path(ApiPath.COLLECTION + "/" + colName + "/count")
                         .build())
                 .map(ArangoResponse::getBody)
                 .map(bytes -> getSerde().deserializeAtJsonPointer("/count", bytes, Long.class));
     }
 
     @Override
-    public Mono<CollectionChecksumEntity> getCollectionChecksum(final String name, final CollectionChecksumParams params) {
+    public Mono<CollectionChecksumEntity> checksum() {
+        return checksum(CollectionChecksumParams.builder().build());
+    }
+
+    @Override
+    public Mono<CollectionChecksumEntity> checksum(final CollectionChecksumParams params) {
         return getCommunication()
                 .execute(ArangoRequest.builder()
                         .database(dbName)
                         .requestType(ArangoRequest.RequestType.GET)
-                        .path(PATH_API + "/" + name + "/checksum")
+                        .path(ApiPath.COLLECTION + "/" + colName + "/checksum")
                         .putQueryParams(
                                 CollectionChecksumParams.WITH_REVISIONS,
                                 params.getWithRevisions().map(String::valueOf)
@@ -210,68 +173,68 @@ public final class CollectionApiImpl extends ArangoClientImpl implements Collect
     }
 
     @Override
-    public Mono<Map<String, Object>> getCollectionStatistics(final String name) {
+    public Mono<Map<String, Object>> statistics() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
                         .database(dbName)
                         .requestType(ArangoRequest.RequestType.GET)
-                        .path(PATH_API + "/" + name + "/figures")
+                        .path(ApiPath.COLLECTION + "/" + colName + "/figures")
                         .build())
                 .map(ArangoResponse::getBody)
                 .map(bytes -> getSerde().deserializeAtJsonPointer("/figures", bytes, STRING_OBJECT_MAP));
     }
 
     @Override
-    public Mono<Void> loadCollection(final String name) {
+    public Mono<Void> load() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
                         .database(dbName)
                         .requestType(ArangoRequest.RequestType.PUT)
-                        .path(PATH_API + "/" + name + "/load")
+                        .path(ApiPath.COLLECTION + "/" + colName + "/load")
                         .build())
                 .then();
     }
 
     @Override
-    public Mono<Void> loadCollectionIndexes(final String name) {
+    public Mono<Void> loadIndexes() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
                         .database(dbName)
                         .requestType(ArangoRequest.RequestType.PUT)
-                        .path(PATH_API + "/" + name + "/loadIndexesIntoMemory")
+                        .path(ApiPath.COLLECTION + "/" + colName + "/loadIndexesIntoMemory")
                         .build())
                 .then();
     }
 
     @Override
-    public Mono<Void> recalculateCollectionCount(final String name) {
+    public Mono<Void> recalculateCount() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
                         .database(dbName)
                         .requestType(ArangoRequest.RequestType.PUT)
-                        .path(PATH_API + "/" + name + "/recalculateCount")
+                        .path(ApiPath.COLLECTION + "/" + colName + "/recalculateCount")
                         .build())
                 .then();
     }
 
     @Override
-    public Mono<Void> truncateCollection(final String name) {
+    public Mono<Void> truncate() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
                         .database(dbName)
                         .requestType(ArangoRequest.RequestType.PUT)
-                        .path(PATH_API + "/" + name + "/truncate")
+                        .path(ApiPath.COLLECTION + "/" + colName + "/truncate")
                         .build())
                 .then();
     }
 
     @Override
-    public Mono<String> getResponsibleShard(final String name, final Object document) {
+    public Mono<String> responsibleShard(final Object document) {
         return getCommunication()
                 .execute(ArangoRequest.builder()
                         .database(dbName)
                         .requestType(ArangoRequest.RequestType.PUT)
-                        .path(PATH_API + "/" + name + "/responsibleShard")
+                        .path(ApiPath.COLLECTION + "/" + colName + "/responsibleShard")
                         .body(getSerde().serialize(document))
                         .build())
                 .map(ArangoResponse::getBody)
@@ -279,24 +242,24 @@ public final class CollectionApiImpl extends ArangoClientImpl implements Collect
     }
 
     @Override
-    public Mono<String> getCollectionRevision(final String name) {
+    public Mono<String> revision() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
                         .database(dbName)
                         .requestType(ArangoRequest.RequestType.GET)
-                        .path(PATH_API + "/" + name + "/revision")
+                        .path(ApiPath.COLLECTION + "/" + colName + "/revision")
                         .build())
                 .map(ArangoResponse::getBody)
                 .map(bytes -> getSerde().deserializeAtJsonPointer("/revision", bytes, String.class));
     }
 
     @Override
-    public Flux<String> getCollectionShards(final String name) {
+    public Flux<String> shards() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
                         .database(dbName)
                         .requestType(ArangoRequest.RequestType.GET)
-                        .path(PATH_API + "/" + name + "/shards")
+                        .path(ApiPath.COLLECTION + "/" + colName + "/shards")
                         .build())
                 .map(ArangoResponse::getBody)
                 .map(bytes -> getSerde().<List<String>>deserializeAtJsonPointer("/shards", bytes, STRING_LIST))
@@ -304,12 +267,12 @@ public final class CollectionApiImpl extends ArangoClientImpl implements Collect
     }
 
     @Override
-    public Mono<Void> unloadCollection(final String name) {
+    public Mono<Void> unload() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
                         .database(dbName)
                         .requestType(ArangoRequest.RequestType.PUT)
-                        .path(PATH_API + "/" + name + "/unload")
+                        .path(ApiPath.COLLECTION + "/" + colName + "/unload")
                         .build())
                 .then();
     }

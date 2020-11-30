@@ -25,6 +25,7 @@ package com.arangodb.reactive.api.util;
  */
 public final class ApiPath {
     public static final String DATABASE = "/_api/database";
+    public static final String COLLECTION = "/_api/collection";
 
     private ApiPath() {
     }

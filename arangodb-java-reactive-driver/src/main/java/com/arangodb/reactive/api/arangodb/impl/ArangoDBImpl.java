@@ -103,6 +103,11 @@ public final class ArangoDBImpl extends ArangoClientImpl implements ArangoDB {
     }
 
     @Override
+    public Mono<Void> createDatabase(String name) {
+        return createDatabase(DatabaseCreateOptions.builder().name(name).build());
+    }
+
+    @Override
     public Mono<Void> createDatabase(final DatabaseCreateOptions options) {
         return getCommunication().execute(
                 ArangoRequest.builder()
