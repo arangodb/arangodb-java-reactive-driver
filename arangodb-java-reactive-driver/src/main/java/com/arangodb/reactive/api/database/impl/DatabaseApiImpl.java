@@ -26,18 +26,14 @@ import com.arangodb.reactive.api.collection.CollectionApi;
 import com.arangodb.reactive.api.collection.impl.CollectionApiImpl;
 import com.arangodb.reactive.api.database.DatabaseApi;
 import com.arangodb.reactive.api.database.entity.DatabaseEntity;
-import com.arangodb.reactive.api.database.options.DatabaseCreateOptions;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
+import com.arangodb.reactive.api.util.ApiPath;
 import com.arangodb.reactive.connection.ArangoRequest;
 import com.arangodb.reactive.connection.ArangoResponse;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 import static com.arangodb.reactive.api.util.ArangoRequestParam.SYSTEM;
 import static com.arangodb.reactive.api.util.ArangoResponseField.RESULT_JSON_POINTER;
-import static com.arangodb.reactive.entity.serde.SerdeTypes.STRING_LIST;
 
 
 /**
@@ -45,7 +41,6 @@ import static com.arangodb.reactive.entity.serde.SerdeTypes.STRING_LIST;
  */
 public final class DatabaseApiImpl extends ArangoClientImpl implements DatabaseApi {
 
-    private static final String PATH_API = "/_api/database";
     private final ArangoDB arango;
     private final String name;
 
@@ -56,12 +51,12 @@ public final class DatabaseApiImpl extends ArangoClientImpl implements DatabaseA
     }
 
     @Override
-    public String name() {
+    public String getName() {
         return name;
     }
 
     @Override
-    public ArangoDB arango() {
+    public ArangoDB arangoDB() {
         return arango;
     }
 
@@ -71,24 +66,12 @@ public final class DatabaseApiImpl extends ArangoClientImpl implements DatabaseA
     }
 
     @Override
-    public Mono<Void> createDatabase(final DatabaseCreateOptions options) {
+    public Mono<DatabaseEntity> info() {
         return getCommunication().execute(
                 ArangoRequest.builder()
-                        .database(SYSTEM)
-                        .requestType(ArangoRequest.RequestType.POST)
-                        .path(PATH_API)
-                        .body(getSerde().serialize(options))
-                        .build()
-        ).then();
-    }
-
-    @Override
-    public Mono<DatabaseEntity> getDatabase(final String dbName) {
-        return getCommunication().execute(
-                ArangoRequest.builder()
-                        .database(dbName)
+                        .database(name)
                         .requestType(ArangoRequest.RequestType.GET)
-                        .path(PATH_API + "/current")
+                        .path(ApiPath.DATABASE + "/current")
                         .build()
         )
                 .map(ArangoResponse::getBody)
@@ -96,43 +79,12 @@ public final class DatabaseApiImpl extends ArangoClientImpl implements DatabaseA
     }
 
     @Override
-    public Flux<String> getDatabases() {
-        return getCommunication()
-                .execute(
-                        ArangoRequest.builder()
-                                .database(SYSTEM)
-                                .requestType(ArangoRequest.RequestType.GET)
-                                .path(PATH_API)
-                                .build()
-                )
-                .map(ArangoResponse::getBody)
-                .map(bytes -> getSerde()
-                        .<List<String>>deserializeAtJsonPointer(RESULT_JSON_POINTER, bytes, STRING_LIST))
-                .flatMapMany(Flux::fromIterable);
-    }
-
-    @Override
-    public Flux<String> getAccessibleDatabases() {
-        return getCommunication().execute(
-                ArangoRequest.builder()
-                        .database(name)
-                        .requestType(ArangoRequest.RequestType.GET)
-                        .path(PATH_API + "/user")
-                        .build()
-        )
-                .map(ArangoResponse::getBody)
-                .map(bytes -> getSerde()
-                        .<List<String>>deserializeAtJsonPointer(RESULT_JSON_POINTER, bytes, STRING_LIST))
-                .flatMapMany(Flux::fromIterable);
-    }
-
-    @Override
-    public Mono<Void> dropDatabase(final String dbName) {
+    public Mono<Void> drop() {
         return getCommunication().execute(
                 ArangoRequest.builder()
                         .database(SYSTEM)
                         .requestType(ArangoRequest.RequestType.DELETE)
-                        .path(PATH_API + "/" + dbName)
+                        .path(ApiPath.DATABASE + "/" + name)
                         .build()
         ).then();
     }

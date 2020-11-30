@@ -20,6 +20,7 @@
 
 package com.arangodb.reactive.api.database;
 
+import com.arangodb.reactive.api.arangodb.ArangoDBSync;
 import com.arangodb.reactive.api.database.entity.DatabaseEntity;
 import com.arangodb.reactive.api.database.entity.Sharding;
 import com.arangodb.reactive.api.database.options.DatabaseCreateOptions;
@@ -44,12 +45,13 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 class DatabaseApiSyncTest {
 
     @ArangoApiTest
-    void createDatabase(TestContext ctx, DatabaseApiSync db) {
+    void createDatabase(TestContext ctx, ArangoDBSync arangoDB) {
         String name = "db-" + UUID.randomUUID().toString();
         DatabaseEntity dbEntity;
-        try (ThreadConversation ignored = db.getConversationManager().requireConversation()) {
-            db.createDatabase(name);
-            dbEntity = db.getDatabase(name);
+        try (ThreadConversation ignored = arangoDB.getConversationManager().requireConversation()) {
+            arangoDB.createDatabase(name);
+            DatabaseApiSync db = arangoDB.db(name);
+            dbEntity = db.info();
 
             assertThat(dbEntity).isNotNull();
             assertThat(dbEntity.getId()).isNotNull();
@@ -64,17 +66,17 @@ class DatabaseApiSyncTest {
             }
 
             // cleanup
-            db.dropDatabase(name);
+            db.drop();
         }
     }
 
 
     @ArangoApiTest
-    void createAndDropDatabaseWithOptions(TestContext ctx, DatabaseApiSync db) {
+    void createAndDropDatabaseWithOptions(TestContext ctx, ArangoDBSync arangoDB) {
         String name = "db-" + UUID.randomUUID().toString();
         DatabaseEntity dbEntity;
-        try (ThreadConversation ignored = db.getConversationManager().requireConversation()) {
-            db.createDatabase(DatabaseCreateOptions
+        try (ThreadConversation ignored = arangoDB.getConversationManager().requireConversation()) {
+            arangoDB.createDatabase(DatabaseCreateOptions
                     .builder()
                     .name(name)
                     .options(DatabaseCreateOptions.Options.builder()
@@ -89,7 +91,8 @@ class DatabaseApiSyncTest {
                             .putExtra("key", "value")
                             .build())
                     .build());
-            dbEntity = db.getDatabase(name);
+            DatabaseApiSync db = arangoDB.db(name);
+            dbEntity = db.info();
 
             assertThat(dbEntity).isNotNull();
             assertThat(dbEntity.getId()).isNotNull();
@@ -105,10 +108,10 @@ class DatabaseApiSyncTest {
 
             // TODO: access db with created user
 
-            db.dropDatabase(name);
+            db.drop();
 
             // get database
-            Throwable thrown = catchThrowable(() -> db.getDatabase(name));
+            Throwable thrown = catchThrowable(db::info);
 
             assertThat(thrown).isInstanceOf(ArangoServerException.class);
             assertThat(thrown.getMessage()).contains("database not found");
@@ -119,8 +122,8 @@ class DatabaseApiSyncTest {
 
 
     @ArangoApiTest
-    void getDatabase(TestContext ctx, DatabaseApiSync db) {
-        DatabaseEntity dbEntity = db.getDatabase("_system");
+    void getDatabase(TestContext ctx, ArangoDBSync arangoDB) {
+        DatabaseEntity dbEntity = arangoDB.db("_system").info();
 
         assertThat(dbEntity.getId()).isNotNull();
         assertThat(dbEntity.getName()).isEqualTo("_system");
@@ -135,15 +138,15 @@ class DatabaseApiSyncTest {
     }
 
     @ArangoApiTest
-    void getDatabases(DatabaseApiSync db) {
-        List<String> databases = db.getDatabases();
+    void getDatabases(ArangoDBSync arangoDB) {
+        List<String> databases = arangoDB.getDatabases();
         assertThat(databases).isNotNull();
         assertThat(databases).contains("_system");
     }
 
     @ArangoApiTest
-    void getAccessibleDatabases(DatabaseApiSync db) {
-        List<String> databases = db.getAccessibleDatabases();
+    void getAccessibleDatabases(ArangoDBSync arangoDB) {
+        List<String> databases = arangoDB.getAccessibleDatabases();
         assertThat(databases).isNotNull();
         assertThat(databases).contains("_system");
     }

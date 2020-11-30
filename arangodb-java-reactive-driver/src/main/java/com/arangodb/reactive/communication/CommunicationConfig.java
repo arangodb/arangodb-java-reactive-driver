@@ -44,6 +44,17 @@ public interface CommunicationConfig {
     }
 
     /**
+     * // TODO: create class ArangoConfig and move this field there
+     *
+     * @return database to use for administration requests. All requests performed from
+     * {@link com.arangodb.reactive.api.arangodb.ArangoDB} will be scoped to this database.
+     */
+    @Value.Default
+    default String getAdministrationDatabase() {
+        return "_system";
+    }
+
+    /**
      * @return ArangoDB host
      */
     Set<HostDescription> getHosts();

@@ -60,7 +60,7 @@ public final class CollectionApiImpl extends ArangoClientImpl implements Collect
 
     public CollectionApiImpl(final DatabaseApi arangoDatabase) {
         super((ArangoClientImpl) arangoDatabase);
-        dbName = arangoDatabase.name();
+        dbName = arangoDatabase.getName();
     }
 
     @Override

@@ -25,8 +25,10 @@ import com.arangodb.codegen.SyncApiDelegator;
 import com.arangodb.codegen.SyncApiIgnore;
 import com.arangodb.reactive.api.arangodb.impl.ArangoDBImpl;
 import com.arangodb.reactive.api.database.DatabaseApi;
+import com.arangodb.reactive.api.database.options.DatabaseCreateOptions;
 import com.arangodb.reactive.api.reactive.ArangoClient;
 import com.arangodb.reactive.communication.CommunicationConfig;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -41,27 +43,71 @@ public interface ArangoDB extends ArangoClient {
     }
 
     /**
+     * @return the name of the database used to perform administration requests
+     */
+    String getAdminDB();
+
+    /**
      * @return the synchronous blocking version of this object
      */
     @SyncApiIgnore
     ArangoDBSync sync();
 
     /**
-     * Returns a {@link DatabaseApi} instance for the {@code _system} database.
-     *
-     * @return database handler
+     * @return {@link DatabaseApi} instance for the administration database
      */
     @SyncApiDelegator
     DatabaseApi db();
 
     /**
-     * Returns a {@link DatabaseApi} instance for the given database name.
-     *
      * @param name Name of the database
-     * @return database handler
+     * @return {@link DatabaseApi} instance for the given database name
      */
     @SyncApiDelegator
     DatabaseApi db(String name);
+
+    /**
+     * Retrieves a list of all existing databases
+     *
+     * @return all existing databases
+     * @note You should use the [GET user API] (FIXME: add javadoc link) to fetch the list of the available databases now.
+     * @see <a href="https://www.arangodb.com/docs/stable/http/database-database-management.html#list-of-databases">API
+     * Documentation</a>
+     */
+    Flux<String> getDatabases();
+
+    /**
+     * Retrieves a list of all databases the current user can access
+     *
+     * @return all databases the current user can access
+     * @see <a href=
+     * "https://www.arangodb.com/docs/stable/http/database-database-management.html#list-of-accessible-databases">API
+     * Documentation</a>
+     */
+    Flux<String> getAccessibleDatabases();
+
+    /**
+     * Creates a new database with the given name.
+     *
+     * @param name Name of the database to create
+     * @return a Mono completing on operation completion
+     * @see <a href="https://www.arangodb.com/docs/stable/http/database-database-management.html#create-database">API
+     * Documentation</a>
+     */
+    default Mono<Void> createDatabase(String name) {
+        return createDatabase(DatabaseCreateOptions.builder().name(name).build());
+    }
+
+    /**
+     * Creates a new database with the given name.
+     *
+     * @param options Creation options
+     * @return a Mono completing on operation completion
+     * @see <a href="https://www.arangodb.com/docs/stable/http/database-database-management.html#create-database">API
+     * Documentation</a>
+     * @since ArangoDB 3.6
+     */
+    Mono<Void> createDatabase(DatabaseCreateOptions options);
 
     /**
      * Closes all connections and releases all the related resources.
