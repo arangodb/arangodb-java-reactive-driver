@@ -20,6 +20,7 @@
 
 package com.arangodb.reactive.connection;
 
+import com.arangodb.reactive.ArangoDefaults;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
@@ -38,7 +39,7 @@ public abstract class ArangoConnection {
     protected ArangoConnection(@Nullable final AuthenticationMethod authenticationMethod) {
         authentication = authenticationMethod;
         userRequest = ArangoRequest.builder()
-                .database("_system")
+                .database(ArangoDefaults.SYSTEM_DB)
                 .path("/_api/user/" + getAuthentication().map(AuthenticationMethod::getUser).orElse("root"))
                 .requestType(ArangoRequest.RequestType.GET)
                 .build();

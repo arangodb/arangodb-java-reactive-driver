@@ -20,13 +20,15 @@
 
 package com.arangodb.reactive.connection;
 
+import com.arangodb.reactive.ArangoDefaults;
+
 /**
  * @author Michele Rastelli
  */
 public final class ConnectionUtils {
 
     public static final ArangoRequest ENDPOINTS_REQUEST = ArangoRequest.builder()
-            .database("_system")
+            .database(ArangoDefaults.SYSTEM_DB)
             .path("/_api/cluster/endpoints")
             .requestType(ArangoRequest.RequestType.GET)
             .build();

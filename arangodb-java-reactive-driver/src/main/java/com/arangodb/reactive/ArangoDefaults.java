@@ -28,7 +28,7 @@ import static reactor.netty.resources.ConnectionProvider.DEFAULT_POOL_MAX_IDLE_T
  */
 public final class ArangoDefaults {
 
-
+    public static final String SYSTEM_DB = "_system";
     public static final int CHUNK_DEFAULT_CONTENT_SIZE = 30_000;
     public static final long DEFAULT_TIMEOUT = DEFAULT_POOL_ACQUIRE_TIMEOUT;
     public static final long DEFAULT_TTL = DEFAULT_POOL_MAX_IDLE_TIME;

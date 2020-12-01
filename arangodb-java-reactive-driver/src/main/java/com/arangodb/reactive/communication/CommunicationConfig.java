@@ -21,6 +21,7 @@
 package com.arangodb.reactive.communication;
 
 
+import com.arangodb.reactive.ArangoDefaults;
 import com.arangodb.reactive.connection.ArangoProtocol;
 import com.arangodb.reactive.connection.AuthenticationMethod;
 import com.arangodb.reactive.connection.ConnectionConfig;
@@ -51,7 +52,7 @@ public interface CommunicationConfig {
      */
     @Value.Default
     default String getAdministrationDatabase() {
-        return "_system";
+        return ArangoDefaults.SYSTEM_DB;
     }
 
     /**
