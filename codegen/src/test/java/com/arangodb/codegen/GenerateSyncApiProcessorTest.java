@@ -26,7 +26,6 @@ import api.TestApi;
 import api.TestApiImpl;
 import com.sun.tools.javac.Main;
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -88,7 +87,7 @@ class GenerateSyncApiProcessorTest {
         );
     }
 
-    @AfterAll
+//    @AfterAll
     static void cleanup() throws IOException {
         // clean generated directory
         FileUtils.deleteDirectory(new File(GENERATED_DIR));
@@ -129,7 +128,7 @@ class GenerateSyncApiProcessorTest {
                 expectedResult = reactiveResult;
             }
 
-            if (reactiveMethod.getName().equals("nested")) {
+            if (reactiveMethod.getName().equals("nested") || reactiveMethod.getName().equals("nestedAsync")) {
                 assertThat(
                         syncResult.getClass().getMethod("name").invoke(syncResult)
                 ).isEqualTo(

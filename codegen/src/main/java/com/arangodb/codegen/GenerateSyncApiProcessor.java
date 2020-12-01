@@ -26,6 +26,7 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -97,6 +98,34 @@ public class GenerateSyncApiProcessor extends AbstractProcessor {
         return true;
     }
 
+    private TypeName mapReturnType(Type returnType) {
+        String enclosingTypeString = returnType.asElement().getQualifiedName().toString();
+        if (Mono.class.getCanonicalName().equals(enclosingTypeString)) {
+            Type argumentType = returnType.getTypeArguments().get(0);
+            String argumentTypeString = argumentType.asElement().getQualifiedName().toString();
+            if (Void.class.getCanonicalName().equals(argumentTypeString)) {
+                return TypeName.VOID;
+            } else {
+                return TypeName.get(argumentType);
+            }
+        } else if (Flux.class.getCanonicalName().equals(enclosingTypeString)) {
+            Type argumentType = returnType.getTypeArguments().get(0);
+            return ParameterizedTypeName.get(ClassName.get(List.class), TypeName.get(argumentType));
+        } else {
+            return TypeName.get(returnType);
+        }
+    }
+
+    private TypeName mapReturnType(MethodSymbol methodSymbol) {
+        Type returnType = methodSymbol.getReturnType();
+        if (methodSymbol.getAnnotation(SyncApiDelegator.class) != null) {
+            String syncClassName = mapReturnType(returnType).toString() + "Sync";
+            return ClassName.bestGuess(syncClassName);
+        } else {
+            return mapReturnType(returnType);
+        }
+    }
+
     private MethodSpec mapMethod(MethodSymbol symbol) {
         String methodName = symbol.getSimpleName().toString();
         List<ParameterSpec> parameters = symbol.getParameters().stream()
@@ -122,30 +151,19 @@ public class GenerateSyncApiProcessor extends AbstractProcessor {
                         .collect(Collectors.toList()),
                 ", ");
 
+        TypeName syncReturnType = mapReturnType(symbol);
+        String statement = "reactive().$L($L)";
+        List<Object> statementArguments = new ArrayList<>();
+
         if (Mono.class.getCanonicalName().equals(enclosingTypeString)) {
-            Type argumentType = returnType.getTypeArguments().get(0);
-            String argumentTypeString = argumentType.asElement().getQualifiedName().toString();
-            if (Void.class.getCanonicalName().equals(argumentTypeString)) {
-                specBuilder
-                        .returns(TypeName.VOID)
-                        .addStatement("reactive().$L($L).block()", methodName, delegationArguments);
-            } else {
-                specBuilder
-                        .returns(TypeName.get(argumentType))
-                        .addStatement("return reactive().$L($L).block()", methodName, delegationArguments);
-            }
+            statement = statement + ".block()";
         } else if (Flux.class.getCanonicalName().equals(enclosingTypeString)) {
-            Type argumentType = returnType.getTypeArguments().get(0);
-            specBuilder
-                    .returns(ParameterizedTypeName.get(ClassName.get(List.class), TypeName.get(argumentType)))
-                    .addStatement("return reactive().$L($L).collectList().block()", methodName, delegationArguments);
-        } else if (symbol.getAnnotation(SyncApiDelegator.class) != null) {
+            statement = statement + ".collectList().block()";
+        }
 
-            // sync interface delegator canonical name
-            String syncClassName = returnType.toString() + "Sync";
-
+        if (symbol.getAnnotation(SyncApiDelegator.class) != null) {
             // sync implementation delegator canonical name
-            String[] returnTypeParts = syncClassName.split("\\.");
+            String[] returnTypeParts = syncReturnType.toString().split("\\.");
             StringBuilder syncImplClassNameBuilder = new StringBuilder();
             for (int i = 0; i < returnTypeParts.length - 1; i++) {
                 syncImplClassNameBuilder.append(returnTypeParts[i]);
@@ -156,15 +174,21 @@ public class GenerateSyncApiProcessor extends AbstractProcessor {
             syncImplClassNameBuilder.append("Impl");
             String syncImplClassName = syncImplClassNameBuilder.toString();
 
-            specBuilder
-                    .returns(ClassName.bestGuess(syncClassName))
-                    .addStatement("return new $T(reactive().$L($L))", ClassName.bestGuess(syncImplClassName), methodName, delegationArguments);
-        } else {
-            specBuilder
-                    .returns(TypeName.get(returnType))
-                    .addStatement("return reactive().$L($L)", methodName, delegationArguments);
+            statement = "new $T(" + statement + ")";
+            statementArguments.add(ClassName.bestGuess(syncImplClassName));
         }
-        return specBuilder.build();
+
+        if (!TypeName.VOID.equals(syncReturnType)) {
+            statement = "return " + statement;
+        }
+
+        statementArguments.add(methodName);
+        statementArguments.add(delegationArguments);
+
+        return specBuilder
+                .addStatement(statement, statementArguments.toArray())
+                .returns(syncReturnType)
+                .build();
     }
 
     private List<MethodSpec> extractMethodSpecImpl(Element e) {
