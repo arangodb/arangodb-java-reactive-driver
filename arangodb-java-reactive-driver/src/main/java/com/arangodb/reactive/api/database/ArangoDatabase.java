@@ -81,7 +81,7 @@ public interface ArangoDatabase extends ArangoClient {
      * @see <a href="https://www.arangodb.com/docs/stable/http/collection-getting.html#reads-all-collections">API
      * Documentation</a>
      */
-    Flux<SimpleCollectionEntity> getCollections();
+    Flux<SimpleCollectionEntity> collections();
 
     /**
      * @param options request options
@@ -89,7 +89,7 @@ public interface ArangoDatabase extends ArangoClient {
      * @see <a href="https://www.arangodb.com/docs/stable/http/collection-getting.html#reads-all-collections">API
      * Documentation</a>
      */
-    Flux<SimpleCollectionEntity> getCollections(CollectionsReadParams options);
+    Flux<SimpleCollectionEntity> collections(CollectionsReadParams options);
 
     /**
      * Creates a collection for the given collection name and returns related information from the server.

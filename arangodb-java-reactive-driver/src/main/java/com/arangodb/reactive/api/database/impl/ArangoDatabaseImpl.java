@@ -102,12 +102,12 @@ public final class ArangoDatabaseImpl extends ArangoClientImpl implements Arango
     }
 
     @Override
-    public Flux<SimpleCollectionEntity> getCollections() {
-        return getCollections(CollectionsReadParams.builder().excludeSystem(true).build());
+    public Flux<SimpleCollectionEntity> collections() {
+        return collections(CollectionsReadParams.builder().excludeSystem(true).build());
     }
 
     @Override
-    public Flux<SimpleCollectionEntity> getCollections(final CollectionsReadParams params) {
+    public Flux<SimpleCollectionEntity> collections(final CollectionsReadParams params) {
         return getCommunication()
                 .execute(
                         ArangoRequest.builder()

@@ -74,7 +74,7 @@ public interface ArangoDB extends ArangoClient {
      * @see <a href="https://www.arangodb.com/docs/stable/http/database-database-management.html#list-of-databases">API
      * Documentation</a>
      */
-    Flux<String> getDatabases();
+    Flux<String> databases();
 
     /**
      * Retrieves a list of all databases the current user can access
@@ -84,7 +84,7 @@ public interface ArangoDB extends ArangoClient {
      * "https://www.arangodb.com/docs/stable/http/database-database-management.html#list-of-accessible-databases">API
      * Documentation</a>
      */
-    Flux<String> getAccessibleDatabases();
+    Flux<String> accessibleDatabases();
 
     /**
      * Creates a new database with the given name.

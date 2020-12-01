@@ -72,7 +72,7 @@ public final class ArangoDBImpl extends ArangoClientImpl implements ArangoDB {
     }
 
     @Override
-    public Flux<String> getDatabases() {
+    public Flux<String> databases() {
         return getCommunication()
                 .execute(
                         ArangoRequest.builder()
@@ -88,7 +88,7 @@ public final class ArangoDBImpl extends ArangoClientImpl implements ArangoDB {
     }
 
     @Override
-    public Flux<String> getAccessibleDatabases() {
+    public Flux<String> accessibleDatabases() {
         return getCommunication().execute(
                 ArangoRequest.builder()
                         .database(adminDB)

@@ -59,7 +59,7 @@ class ArangoCollectionSyncTest {
     @ArangoApiTest
     void getCollectionsAndGetCollectionInfo(ArangoDatabaseSync database) {
         Optional<SimpleCollectionEntity> graphsOpt = database
-                .getCollections(CollectionsReadParams.builder().excludeSystem(false).build())
+                .collections(CollectionsReadParams.builder().excludeSystem(false).build())
                 .stream()
                 .filter(c -> c.getName().equals("_graphs"))
                 .findFirst();
@@ -72,7 +72,7 @@ class ArangoCollectionSyncTest {
         assertThat(graphs.getGloballyUniqueId()).isNotNull();
 
         Optional<SimpleCollectionEntity> collection = database
-                .getCollections(CollectionsReadParams.builder().excludeSystem(true).build())
+                .collections(CollectionsReadParams.builder().excludeSystem(true).build())
                 .stream()
                 .filter(c -> c.getName().equals("_graphs"))
                 .findFirst();

@@ -137,14 +137,14 @@ class ArangoDatabaseSyncTest {
 
     @ArangoApiTest
     void getDatabases(ArangoDBSync arangoDB) {
-        List<String> databases = arangoDB.getDatabases();
+        List<String> databases = arangoDB.databases();
         assertThat(databases).isNotNull();
         assertThat(databases).contains("_system");
     }
 
     @ArangoApiTest
     void getAccessibleDatabases(ArangoDBSync arangoDB) {
-        List<String> databases = arangoDB.getAccessibleDatabases();
+        List<String> databases = arangoDB.accessibleDatabases();
         assertThat(databases).isNotNull();
         assertThat(databases).contains("_system");
     }
