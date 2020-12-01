@@ -49,8 +49,7 @@ class DatabaseApiSyncTest {
         String name = "db-" + UUID.randomUUID().toString();
         DatabaseEntity dbEntity;
         try (ThreadConversation ignored = arangoDB.getConversationManager().requireConversation()) {
-            arangoDB.createDatabase(name);
-            DatabaseApiSync db = arangoDB.db(name);
+            DatabaseApiSync db = arangoDB.createDatabase(name);
             dbEntity = db.info();
 
             assertThat(dbEntity).isNotNull();
@@ -76,7 +75,7 @@ class DatabaseApiSyncTest {
         String name = "db-" + UUID.randomUUID().toString();
         DatabaseEntity dbEntity;
         try (ThreadConversation ignored = arangoDB.getConversationManager().requireConversation()) {
-            arangoDB.createDatabase(DatabaseCreateOptions
+            DatabaseApiSync db = arangoDB.createDatabase(DatabaseCreateOptions
                     .builder()
                     .name(name)
                     .options(DatabaseCreateOptions.Options.builder()
@@ -91,7 +90,6 @@ class DatabaseApiSyncTest {
                             .putExtra("key", "value")
                             .build())
                     .build());
-            DatabaseApiSync db = arangoDB.db(name);
             dbEntity = db.info();
 
             assertThat(dbEntity).isNotNull();

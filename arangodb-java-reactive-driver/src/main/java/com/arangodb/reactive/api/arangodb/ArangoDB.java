@@ -94,7 +94,8 @@ public interface ArangoDB extends ArangoClient {
      * @see <a href="https://www.arangodb.com/docs/stable/http/database-database-management.html#create-database">API
      * Documentation</a>
      */
-    Mono<Void> createDatabase(String name);
+    @SyncApiDelegator
+    Mono<DatabaseApi> createDatabase(String name);
 
     /**
      * Creates a new database with the given name.
@@ -105,7 +106,8 @@ public interface ArangoDB extends ArangoClient {
      * Documentation</a>
      * @since ArangoDB 3.6
      */
-    Mono<Void> createDatabase(DatabaseCreateOptions options);
+    @SyncApiDelegator
+    Mono<DatabaseApi> createDatabase(DatabaseCreateOptions options);
 
     /**
      * Closes all connections and releases all the related resources.
