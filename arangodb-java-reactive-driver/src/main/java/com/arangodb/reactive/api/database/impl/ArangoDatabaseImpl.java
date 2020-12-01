@@ -51,7 +51,7 @@ import static com.arangodb.reactive.api.util.ArangoResponseField.RESULT_JSON_POI
  */
 public final class ArangoDatabaseImpl extends ArangoClientImpl implements ArangoDatabase {
 
-    private static final JavaType simpleCollectionList = TypeFactory.defaultInstance().constructCollectionType(ArrayList.class, SimpleCollectionEntity.class);
+    private static final JavaType SIMPLE_COLLECTION_LIST = TypeFactory.defaultInstance().constructCollectionType(ArrayList.class, SimpleCollectionEntity.class);
 
     private final ArangoDB arango;
     private final String name;
@@ -73,8 +73,8 @@ public final class ArangoDatabaseImpl extends ArangoClientImpl implements Arango
     }
 
     @Override
-    public ArangoCollection collection(final String name) {
-        return new ArangoCollectionImpl(this, name);
+    public ArangoCollection collection(final String collectionName) {
+        return new ArangoCollectionImpl(this, collectionName);
     }
 
     @Override
@@ -122,12 +122,12 @@ public final class ArangoDatabaseImpl extends ArangoClientImpl implements Arango
                 )
                 .map(ArangoResponse::getBody)
                 .map(bytes -> getSerde()
-                        .<List<SimpleCollectionEntity>>deserializeAtJsonPointer(RESULT_JSON_POINTER, bytes, simpleCollectionList))
+                        .<List<SimpleCollectionEntity>>deserializeAtJsonPointer(RESULT_JSON_POINTER, bytes, SIMPLE_COLLECTION_LIST))
                 .flatMapMany(Flux::fromIterable);
     }
 
     @Override
-    public Mono<DetailedCollectionEntity> createCollection(CollectionCreateOptions options) {
+    public Mono<DetailedCollectionEntity> createCollection(final CollectionCreateOptions options) {
         return createCollection(options, CollectionCreateParams.builder().build());
     }
 

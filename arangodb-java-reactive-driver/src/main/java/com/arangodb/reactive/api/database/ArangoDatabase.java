@@ -53,11 +53,11 @@ public interface ArangoDatabase extends ArangoClient {
     ArangoDB arangoDB();
 
     /**
-     * @param name Name of the collection
+     * @param collectionName Name of the collection
      * @return CollectionApi for the current database
      */
     @SyncApiDelegator
-    ArangoCollection collection(String name);
+    ArangoCollection collection(String collectionName);
 
     /**
      * @return information about the database
