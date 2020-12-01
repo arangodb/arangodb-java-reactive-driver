@@ -21,7 +21,7 @@
 package com.arangodb.reactive.api.collection.impl;
 
 
-import com.arangodb.reactive.api.collection.CollectionApi;
+import com.arangodb.reactive.api.collection.ArangoCollection;
 import com.arangodb.reactive.api.collection.entity.CollectionChecksumEntity;
 import com.arangodb.reactive.api.collection.entity.DetailedCollectionEntity;
 import com.arangodb.reactive.api.collection.entity.SimpleCollectionEntity;
@@ -29,7 +29,7 @@ import com.arangodb.reactive.api.collection.options.CollectionChangePropertiesOp
 import com.arangodb.reactive.api.collection.options.CollectionChecksumParams;
 import com.arangodb.reactive.api.collection.options.CollectionDropParams;
 import com.arangodb.reactive.api.collection.options.CollectionRenameOptions;
-import com.arangodb.reactive.api.database.DatabaseApi;
+import com.arangodb.reactive.api.database.ArangoDatabase;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
 import com.arangodb.reactive.api.util.ApiPath;
 import com.arangodb.reactive.connection.ArangoRequest;
@@ -46,12 +46,12 @@ import static com.arangodb.reactive.entity.serde.SerdeTypes.STRING_OBJECT_MAP;
 /**
  * @author Michele Rastelli
  */
-public final class CollectionApiImpl extends ArangoClientImpl implements CollectionApi {
+public final class ArangoCollectionImpl extends ArangoClientImpl implements ArangoCollection {
 
     private final String dbName;
     private final String colName;
 
-    public CollectionApiImpl(final DatabaseApi arangoDatabase, final String collectionName) {
+    public ArangoCollectionImpl(final ArangoDatabase arangoDatabase, final String collectionName) {
         super((ArangoClientImpl) arangoDatabase);
         dbName = arangoDatabase.getName();
         colName = collectionName;

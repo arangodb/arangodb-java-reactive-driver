@@ -22,14 +22,14 @@ package com.arangodb.reactive.api.database.impl;
 
 
 import com.arangodb.reactive.api.arangodb.ArangoDB;
-import com.arangodb.reactive.api.collection.CollectionApi;
+import com.arangodb.reactive.api.collection.ArangoCollection;
 import com.arangodb.reactive.api.collection.entity.DetailedCollectionEntity;
 import com.arangodb.reactive.api.collection.entity.SimpleCollectionEntity;
-import com.arangodb.reactive.api.collection.impl.CollectionApiImpl;
+import com.arangodb.reactive.api.collection.impl.ArangoCollectionImpl;
 import com.arangodb.reactive.api.collection.options.CollectionCreateOptions;
 import com.arangodb.reactive.api.collection.options.CollectionCreateParams;
 import com.arangodb.reactive.api.collection.options.CollectionsReadParams;
-import com.arangodb.reactive.api.database.DatabaseApi;
+import com.arangodb.reactive.api.database.ArangoDatabase;
 import com.arangodb.reactive.api.database.entity.DatabaseEntity;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
 import com.arangodb.reactive.api.util.ApiPath;
@@ -49,14 +49,14 @@ import static com.arangodb.reactive.api.util.ArangoResponseField.RESULT_JSON_POI
 /**
  * @author Michele Rastelli
  */
-public final class DatabaseApiImpl extends ArangoClientImpl implements DatabaseApi {
+public final class ArangoDatabaseImpl extends ArangoClientImpl implements ArangoDatabase {
 
     private static final JavaType simpleCollectionList = TypeFactory.defaultInstance().constructCollectionType(ArrayList.class, SimpleCollectionEntity.class);
 
     private final ArangoDB arango;
     private final String name;
 
-    public DatabaseApiImpl(final ArangoDB arangoDB, final String dbName) {
+    public ArangoDatabaseImpl(final ArangoDB arangoDB, final String dbName) {
         super((ArangoClientImpl) arangoDB);
         arango = arangoDB;
         this.name = dbName;
@@ -73,8 +73,8 @@ public final class DatabaseApiImpl extends ArangoClientImpl implements DatabaseA
     }
 
     @Override
-    public CollectionApi collection(final String name) {
-        return new CollectionApiImpl(this, name);
+    public ArangoCollection collection(final String name) {
+        return new ArangoCollectionImpl(this, name);
     }
 
     @Override

@@ -42,14 +42,14 @@ import static org.assertj.core.api.Assertions.catchThrowable;
  * @author Michele Rastelli
  */
 @ArangoApiTestClass
-class DatabaseApiSyncTest {
+class ArangoDatabaseSyncTest {
 
     @ArangoApiTest
     void createDatabase(TestContext ctx, ArangoDBSync arangoDB) {
         String name = "db-" + UUID.randomUUID().toString();
         DatabaseEntity dbEntity;
         try (ThreadConversation ignored = arangoDB.getConversationManager().requireConversation()) {
-            DatabaseApiSync db = arangoDB.createDatabase(name);
+            ArangoDatabaseSync db = arangoDB.createDatabase(name);
             dbEntity = db.info();
 
             assertThat(dbEntity).isNotNull();
@@ -75,7 +75,7 @@ class DatabaseApiSyncTest {
         String name = "db-" + UUID.randomUUID().toString();
         DatabaseEntity dbEntity;
         try (ThreadConversation ignored = arangoDB.getConversationManager().requireConversation()) {
-            DatabaseApiSync db = arangoDB.createDatabase(DatabaseCreateOptions
+            ArangoDatabaseSync db = arangoDB.createDatabase(DatabaseCreateOptions
                     .builder()
                     .name(name)
                     .options(DatabaseCreateOptions.Options.builder()

@@ -24,7 +24,7 @@ import com.arangodb.codegen.GenerateSyncApi;
 import com.arangodb.codegen.SyncApiDelegator;
 import com.arangodb.codegen.SyncApiIgnore;
 import com.arangodb.reactive.api.arangodb.impl.ArangoDBImpl;
-import com.arangodb.reactive.api.database.DatabaseApi;
+import com.arangodb.reactive.api.database.ArangoDatabase;
 import com.arangodb.reactive.api.database.options.DatabaseCreateOptions;
 import com.arangodb.reactive.api.reactive.ArangoClient;
 import com.arangodb.reactive.communication.CommunicationConfig;
@@ -54,17 +54,17 @@ public interface ArangoDB extends ArangoClient {
     ArangoDBSync sync();
 
     /**
-     * @return {@link DatabaseApi} instance for the administration database
+     * @return {@link ArangoDatabase} instance for the administration database
      */
     @SyncApiDelegator
-    DatabaseApi db();
+    ArangoDatabase db();
 
     /**
      * @param name Name of the database
-     * @return {@link DatabaseApi} instance for the given database name
+     * @return {@link ArangoDatabase} instance for the given database name
      */
     @SyncApiDelegator
-    DatabaseApi db(String name);
+    ArangoDatabase db(String name);
 
     /**
      * Retrieves a list of all existing databases
@@ -95,7 +95,7 @@ public interface ArangoDB extends ArangoClient {
      * Documentation</a>
      */
     @SyncApiDelegator
-    Mono<DatabaseApi> createDatabase(String name);
+    Mono<ArangoDatabase> createDatabase(String name);
 
     /**
      * Creates a new database with the given name.
@@ -107,7 +107,7 @@ public interface ArangoDB extends ArangoClient {
      * @since ArangoDB 3.6
      */
     @SyncApiDelegator
-    Mono<DatabaseApi> createDatabase(DatabaseCreateOptions options);
+    Mono<ArangoDatabase> createDatabase(DatabaseCreateOptions options);
 
     /**
      * Closes all connections and releases all the related resources.

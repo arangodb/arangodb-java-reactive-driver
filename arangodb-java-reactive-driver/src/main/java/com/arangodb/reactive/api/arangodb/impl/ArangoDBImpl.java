@@ -23,8 +23,8 @@ package com.arangodb.reactive.api.arangodb.impl;
 
 import com.arangodb.reactive.api.arangodb.ArangoDB;
 import com.arangodb.reactive.api.arangodb.ArangoDBSync;
-import com.arangodb.reactive.api.database.DatabaseApi;
-import com.arangodb.reactive.api.database.impl.DatabaseApiImpl;
+import com.arangodb.reactive.api.database.ArangoDatabase;
+import com.arangodb.reactive.api.database.impl.ArangoDatabaseImpl;
 import com.arangodb.reactive.api.database.options.DatabaseCreateOptions;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
 import com.arangodb.reactive.api.util.ApiPath;
@@ -62,13 +62,13 @@ public final class ArangoDBImpl extends ArangoClientImpl implements ArangoDB {
     }
 
     @Override
-    public DatabaseApi db() {
+    public ArangoDatabase db() {
         return db(adminDB);
     }
 
     @Override
-    public DatabaseApi db(final String name) {
-        return new DatabaseApiImpl(this, name);
+    public ArangoDatabase db(final String name) {
+        return new ArangoDatabaseImpl(this, name);
     }
 
     @Override
@@ -103,12 +103,12 @@ public final class ArangoDBImpl extends ArangoClientImpl implements ArangoDB {
     }
 
     @Override
-    public Mono<DatabaseApi> createDatabase(final String name) {
+    public Mono<ArangoDatabase> createDatabase(final String name) {
         return createDatabase(DatabaseCreateOptions.builder().name(name).build());
     }
 
     @Override
-    public Mono<DatabaseApi> createDatabase(final DatabaseCreateOptions options) {
+    public Mono<ArangoDatabase> createDatabase(final DatabaseCreateOptions options) {
         return getCommunication()
                 .execute(
                         ArangoRequest.builder()

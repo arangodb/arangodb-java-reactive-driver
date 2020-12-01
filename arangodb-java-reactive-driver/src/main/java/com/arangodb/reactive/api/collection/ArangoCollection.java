@@ -39,7 +39,7 @@ import java.util.Map;
  * @author Michele Rastelli
  */
 @GenerateSyncApi
-public interface CollectionApi extends ArangoClient {
+public interface ArangoCollection extends ArangoClient {
 
     /**
      * @return collection name

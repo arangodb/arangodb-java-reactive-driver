@@ -24,7 +24,7 @@ package com.arangodb.reactive.api.database;
 import com.arangodb.codegen.GenerateSyncApi;
 import com.arangodb.codegen.SyncApiDelegator;
 import com.arangodb.reactive.api.arangodb.ArangoDB;
-import com.arangodb.reactive.api.collection.CollectionApi;
+import com.arangodb.reactive.api.collection.ArangoCollection;
 import com.arangodb.reactive.api.collection.entity.DetailedCollectionEntity;
 import com.arangodb.reactive.api.collection.entity.SimpleCollectionEntity;
 import com.arangodb.reactive.api.collection.options.CollectionCreateOptions;
@@ -39,7 +39,7 @@ import reactor.core.publisher.Mono;
  * @author Michele Rastelli
  */
 @GenerateSyncApi
-public interface DatabaseApi extends ArangoClient {
+public interface ArangoDatabase extends ArangoClient {
 
     /**
      * @return database name
@@ -57,7 +57,7 @@ public interface DatabaseApi extends ArangoClient {
      * @return CollectionApi for the current database
      */
     @SyncApiDelegator
-    CollectionApi collection(String name);
+    ArangoCollection collection(String name);
 
     /**
      * @return information about the database
