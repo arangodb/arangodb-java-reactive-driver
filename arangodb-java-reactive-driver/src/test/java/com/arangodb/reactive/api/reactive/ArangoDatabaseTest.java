@@ -20,18 +20,17 @@
 
 package com.arangodb.reactive.api.reactive;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import com.arangodb.reactive.api.utils.ArangoApiTest;
+import com.arangodb.reactive.api.utils.ArangoApiTestClass;
 
 
 /**
  * @author Michele Rastelli
  */
-@Tag("api")
+@ArangoApiTestClass
 class ArangoDatabaseTest {
 
-
-    @Test
+    @ArangoApiTest
     void shutdown() {
         // TODO
     }

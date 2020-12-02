@@ -21,12 +21,8 @@
 package com.arangodb.reactive.api.sync;
 
 import com.arangodb.reactive.api.arangodb.ArangoDBSync;
-import com.arangodb.reactive.api.utils.ArangoDBSyncProvider;
-import com.arangodb.reactive.api.utils.TestContext;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
+import com.arangodb.reactive.api.utils.ArangoApiTest;
+import com.arangodb.reactive.api.utils.ArangoApiTestClass;
 
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.CompletableFuture;
@@ -41,25 +37,23 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 /**
  * @author Michele Rastelli
  */
-@Tag("api")
+@ArangoApiTestClass
 class ArangoDBSyncTest {
 
-    @Test
+    @ArangoApiTest
     void shutdown() {
     }
 
-    @ParameterizedTest(name = "{0}")
-    @ArgumentsSource(ArangoDBSyncProvider.class)
-    void alreadyExistingThreadConversation(TestContext ctx, ArangoDBSync arango) {
+    @ArangoApiTest
+    void alreadyExistingThreadConversation(ArangoDBSync arango) {
         try (ThreadConversation tc = arango.getConversationManager().requireConversation()) {
             Throwable thrown = catchThrowable(() -> arango.getConversationManager().requireConversation());
             assertThat(thrown).isInstanceOf(IllegalStateException.class);
         }
     }
 
-    @ParameterizedTest(name = "{0}")
-    @ArgumentsSource(ArangoDBSyncProvider.class)
-    void wrongThreadClosingThreadConversation(TestContext ctx, ArangoDBSync arango) {
+    @ArangoApiTest
+    void wrongThreadClosingThreadConversation(ArangoDBSync arango) {
         ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1, (ThreadFactory) Thread::new);
         try (ThreadConversation tc = arango.getConversationManager().requireConversation()) {
             Throwable thrown = catchThrowable(() -> CompletableFuture.runAsync(tc::close, executor).join());

@@ -21,11 +21,8 @@
 package com.arangodb.reactive.api.reactive;
 
 import com.arangodb.reactive.api.arangodb.ArangoDB;
-import com.arangodb.reactive.api.utils.ArangoDBProvider;
-import com.arangodb.reactive.api.utils.TestContext;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
+import com.arangodb.reactive.api.utils.ArangoApiTest;
+import com.arangodb.reactive.api.utils.ArangoApiTestClass;
 import reactor.core.publisher.Mono;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,12 +31,11 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 /**
  * @author Michele Rastelli
  */
-@Tag("api")
+@ArangoApiTestClass
 class ArangoDBTest {
 
-    @ParameterizedTest(name = "{0}")
-    @ArgumentsSource(ArangoDBProvider.class)
-    void alreadyExistingConversation(TestContext ctx, ArangoDB arango) {
+    @ArangoApiTest
+    void alreadyExistingConversation(ArangoDB arango) {
         Throwable thrown = catchThrowable(() ->
                 arango.getConversationManager().requireConversation(
                         arango.getConversationManager().requireConversation(
