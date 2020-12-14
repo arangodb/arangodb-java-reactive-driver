@@ -21,10 +21,9 @@
 package com.arangodb.reactive.api.utils;
 
 import com.arangodb.reactive.api.arangodb.ArangoDB;
-import com.arangodb.reactive.api.collection.CollectionApi;
-import com.arangodb.reactive.api.collection.CollectionApiSync;
-import com.arangodb.reactive.api.database.DatabaseApi;
-import com.arangodb.reactive.api.database.DatabaseApiSync;
+import com.arangodb.reactive.api.arangodb.ArangoDBSync;
+import com.arangodb.reactive.api.database.ArangoDatabase;
+import com.arangodb.reactive.api.database.ArangoDatabaseSync;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
@@ -58,17 +57,17 @@ public class ArangoApiParameterResolver implements ParameterResolver {
     }
 
     private Object resolve(Class<?> clazz, ExtensionContext extensionContext) {
-        final DatabaseApi db = testClient.db(extensionContext.getRequiredTestClass().getSimpleName());
-        final DatabaseApiSync dbSync = testClient.sync().db(extensionContext.getRequiredTestClass().getSimpleName());
+        final ArangoDatabase db = testClient.db(extensionContext.getRequiredTestClass().getSimpleName());
+        final ArangoDatabaseSync dbSync = testClient.sync().db(extensionContext.getRequiredTestClass().getSimpleName());
         if (clazz == TestContext.class) {
             return testContext;
-        } else if (clazz == CollectionApi.class) {
-            return db.collectionApi();
-        } else if (clazz == CollectionApiSync.class) {
-            return dbSync.collectionApi();
-        } else if (clazz == DatabaseApi.class) {
+        } else if (clazz == ArangoDB.class) {
+            return testClient;
+        } else if (clazz == ArangoDBSync.class) {
+            return testClient.sync();
+        } else if (clazz == ArangoDatabase.class) {
             return db;
-        } else if (clazz == DatabaseApiSync.class) {
+        } else if (clazz == ArangoDatabaseSync.class) {
             return dbSync;
         } else {
             return null;

@@ -34,6 +34,7 @@ import com.arangodb.reactive.api.collection.options.CollectionDropParams;
 import com.arangodb.reactive.api.collection.options.CollectionRenameOptions;
 import com.arangodb.reactive.api.collection.options.CollectionsReadParams;
 import com.arangodb.reactive.api.collection.options.KeyOptions;
+import com.arangodb.reactive.api.database.ArangoDatabaseSync;
 import com.arangodb.reactive.api.entity.ReplicationFactor;
 import com.arangodb.reactive.api.sync.ThreadConversation;
 import com.arangodb.reactive.api.utils.ArangoApiTest;
@@ -53,12 +54,12 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * @author Michele Rastelli
  */
 @ArangoApiTestClass
-class CollectionApiSyncTest {
+class ArangoCollectionSyncTest {
 
     @ArangoApiTest
-    void getCollectionsAndGetCollectionInfo(CollectionApiSync collectionApi) {
-        Optional<SimpleCollectionEntity> graphsOpt = collectionApi
-                .getCollections(CollectionsReadParams.builder().excludeSystem(false).build())
+    void getCollectionsAndGetCollectionInfo(ArangoDatabaseSync database) {
+        Optional<SimpleCollectionEntity> graphsOpt = database
+                .collections(CollectionsReadParams.builder().excludeSystem(false).build())
                 .stream()
                 .filter(c -> c.getName().equals("_graphs"))
                 .findFirst();
@@ -70,20 +71,20 @@ class CollectionApiSyncTest {
         assertThat(graphs.getType()).isEqualTo(CollectionType.DOCUMENT);
         assertThat(graphs.getGloballyUniqueId()).isNotNull();
 
-        Optional<SimpleCollectionEntity> collection = collectionApi
-                .getCollections(CollectionsReadParams.builder().excludeSystem(true).build())
+        Optional<SimpleCollectionEntity> collection = database
+                .collections(CollectionsReadParams.builder().excludeSystem(true).build())
                 .stream()
                 .filter(c -> c.getName().equals("_graphs"))
                 .findFirst();
 
         assertThat(collection).isNotPresent();
 
-        SimpleCollectionEntity graphsInfo = collectionApi.getCollection("_graphs");
+        SimpleCollectionEntity graphsInfo = database.collection("_graphs").info();
         assertThat(graphsInfo).isEqualTo(graphs);
     }
 
     @ArangoApiTest
-    void createCollectionAndGetCollectionProperties(TestContext ctx, CollectionApiSync collectionApi) {
+    void createCollectionAndGetCollectionProperties(TestContext ctx, ArangoDatabaseSync database) {
         CollectionSchema collectionSchema = CollectionSchema.builder()
                 .level(CollectionSchema.Level.NEW)
                 .rule(("{  " +
@@ -117,7 +118,7 @@ class CollectionApiSyncTest {
                 .cacheEnabled(true)
                 .build();
 
-        DetailedCollectionEntity createdCollection = collectionApi.createCollection(
+        DetailedCollectionEntity createdCollection = database.createCollection(
                 options,
                 CollectionCreateParams.builder()
                         .enforceReplicationFactor(true)
@@ -152,14 +153,15 @@ class CollectionApiSyncTest {
                         .distributeShardsLike(options.getName())
                         .shardKeys(options.getShardKeys())
                         .build();
-                DetailedCollectionEntity shardLikeCollection = collectionApi.createCollection(shardLikeOptions);
+                DetailedCollectionEntity shardLikeCollection = database.createCollection(shardLikeOptions);
                 assertThat(shardLikeCollection).isNotNull();
                 assertThat(shardLikeCollection.getDistributeShardsLike()).isEqualTo(createdCollection.getName());
             }
         }
 
         // readCollectionProperties
-        DetailedCollectionEntity readCollectionProperties = collectionApi.getCollectionProperties(options.getName());
+        ArangoCollectionSync collection = database.collection(options.getName());
+        DetailedCollectionEntity readCollectionProperties = collection.properties();
         assertThat(readCollectionProperties).isEqualTo(createdCollection);
 
         CollectionSchema changedCollectionSchema = CollectionSchema.builder()
@@ -169,8 +171,7 @@ class CollectionApiSyncTest {
                 .build();
 
         // changeCollectionProperties
-        DetailedCollectionEntity changedCollectionProperties = collectionApi.changeCollectionProperties(
-                options.getName(),
+        DetailedCollectionEntity changedCollectionProperties = collection.changeProperties(
                 CollectionChangePropertiesOptions.builder()
                         .waitForSync(!createdCollection.getWaitForSync())
                         .schema(changedCollectionSchema)
@@ -184,145 +185,161 @@ class CollectionApiSyncTest {
     }
 
     @ArangoApiTest
-    void countAndDropCollection(CollectionApiSync collectionApi) {
+    void countAndDropCollection(ArangoDatabaseSync database) {
         String name = "collection-" + UUID.randomUUID().toString();
-        collectionApi.createCollection(
+        database.createCollection(
                 CollectionCreateOptions.builder().name(name).build(),
                 CollectionCreateParams.builder().waitForSyncReplication(true).build()
         );
 
+        ArangoCollectionSync collection = database.collection(name);
+
         // FIXME:
 //        assertThat(collectionApi.existsCollection(name)).isTrue();
-        assertThat(collectionApi.getCollectionCount(name)).isZero();
+        assertThat(collection.count()).isZero();
 
-        try (ThreadConversation ignored = collectionApi.getConversationManager().requireConversation()) {
-            collectionApi.dropCollection(name);
+        try (ThreadConversation ignored = database.getConversationManager().requireConversation()) {
+            collection.drop();
             // FIXME:
 //            assertThat(collectionApi.existsCollection(name)).isFalse();
         }
     }
 
     @ArangoApiTest
-    void createAndDropSystemCollection(CollectionApiSync collectionApi) {
+    void createAndDropSystemCollection(ArangoDatabaseSync database) {
         String name = "collection-" + UUID.randomUUID().toString();
-        collectionApi.createCollection(
+        database.createCollection(
                 CollectionCreateOptions.builder().name(name).isSystem(true).build(),
                 CollectionCreateParams.builder().waitForSyncReplication(true).build()
         );
 
+        ArangoCollectionSync collection = database.collection(name);
+
         // FIXME:
 //        assertThat(collectionApi.existsCollection(name)).isTrue();
 
-        try (ThreadConversation ignored = collectionApi.getConversationManager().requireConversation()) {
-            collectionApi.dropCollection(name, CollectionDropParams.builder().isSystem(true).build());
+        try (ThreadConversation ignored = database.getConversationManager().requireConversation()) {
+            collection.drop(CollectionDropParams.builder().isSystem(true).build());
             // FIXME:
 //            assertThat(collectionApi.existsCollection(name)).isFalse();
         }
     }
 
     @ArangoApiTest
-    void renameCollection(TestContext ctx, CollectionApiSync collectionApi) {
+    void renameCollection(TestContext ctx, ArangoDatabaseSync database) {
         assumeTrue(!ctx.isCluster());
 
         String name = "collection-" + UUID.randomUUID().toString();
 
-        DetailedCollectionEntity created = collectionApi.createCollection(CollectionCreateOptions.builder().name(name).build());
+        DetailedCollectionEntity created = database.createCollection(CollectionCreateOptions.builder().name(name).build());
         assertThat(created).isNotNull();
         assertThat(created.getName()).isEqualTo(name);
 
+        ArangoCollectionSync collection = database.collection(name);
+
         String newName = "collection-" + UUID.randomUUID().toString();
-        SimpleCollectionEntity renamed = collectionApi.renameCollection(name, CollectionRenameOptions.builder().name(newName).build());
+        SimpleCollectionEntity renamed = collection.rename(CollectionRenameOptions.builder().name(newName).build());
         assertThat(renamed).isNotNull();
         assertThat(renamed.getName()).isEqualTo(newName);
     }
 
     @ArangoApiTest
-    void truncateCollection(CollectionApiSync collectionApi) {
+    void truncateCollection(ArangoDatabaseSync database) {
 
         // FIXME: add some docs to the collection
 
         String name = "collection-" + UUID.randomUUID().toString();
-        collectionApi.createCollection(CollectionCreateOptions.builder().name(name).build());
-        collectionApi.truncateCollection(name);
-        Long count = collectionApi.getCollectionCount(name);
+        database.createCollection(CollectionCreateOptions.builder().name(name).build());
+        ArangoCollectionSync collection = database.collection(name);
+        collection.truncate();
+        Long count = collection.count();
         assertThat(count).isEqualTo(0L);
     }
 
     @ArangoApiTest
-    void getCollectionChecksum(TestContext ctx, CollectionApiSync collectionApi) {
+    void getCollectionChecksum(TestContext ctx, ArangoDatabaseSync database) {
         assumeTrue(!ctx.isCluster());
 
         String name = "collection-" + UUID.randomUUID().toString();
-        collectionApi.createCollection(CollectionCreateOptions.builder().name(name).build());
-        CollectionChecksumEntity collectionChecksumEntity = collectionApi.getCollectionChecksum(name);
+        database.createCollection(CollectionCreateOptions.builder().name(name).build());
+        ArangoCollectionSync collection = database.collection(name);
+        CollectionChecksumEntity collectionChecksumEntity = collection.checksum();
         assertThat(collectionChecksumEntity).isNotNull();
         assertThat(collectionChecksumEntity.getChecksum()).isNotNull();
         assertThat(collectionChecksumEntity.getRevision()).isNotNull();
     }
 
     @ArangoApiTest
-    void getCollectionStatistics(CollectionApiSync collectionApi) {
+    void getCollectionStatistics(ArangoDatabaseSync database) {
         String name = "collection-" + UUID.randomUUID().toString();
-        collectionApi.createCollection(CollectionCreateOptions.builder().name(name).build());
-        Map<String, Object> collectionStatistics = collectionApi.getCollectionStatistics(name);
+        database.createCollection(CollectionCreateOptions.builder().name(name).build());
+        ArangoCollectionSync collection = database.collection(name);
+        Map<String, Object> collectionStatistics = collection.statistics();
         assertThat(collectionStatistics).isNotNull();
     }
 
     @ArangoApiTest
-    void loadCollection(CollectionApiSync collectionApi) {
+    void loadCollection(ArangoDatabaseSync database) {
         String name = "collection-" + UUID.randomUUID().toString();
-        collectionApi.createCollection(CollectionCreateOptions.builder().name(name).build());
-        collectionApi.loadCollection(name);
+        database.createCollection(CollectionCreateOptions.builder().name(name).build());
+        ArangoCollectionSync collection = database.collection(name);
+        collection.load();
     }
 
     @ArangoApiTest
-    void loadCollectionIndexes(CollectionApiSync collectionApi) {
+    void loadCollectionIndexes(ArangoDatabaseSync database) {
         String name = "collection-" + UUID.randomUUID().toString();
-        collectionApi.createCollection(CollectionCreateOptions.builder().name(name).build());
-        collectionApi.loadCollectionIndexes(name);
+        database.createCollection(CollectionCreateOptions.builder().name(name).build());
+        ArangoCollectionSync collection = database.collection(name);
+        collection.load();
     }
 
     @ArangoApiTest
-    void recalculateCollectionCount(CollectionApiSync collectionApi) {
+    void recalculateCollectionCount(ArangoDatabaseSync database) {
         String name = "collection-" + UUID.randomUUID().toString();
-        collectionApi.createCollection(CollectionCreateOptions.builder().name(name).build());
-        collectionApi.recalculateCollectionCount(name);
+        database.createCollection(CollectionCreateOptions.builder().name(name).build());
+        ArangoCollectionSync collection = database.collection(name);
+        collection.recalculateCount();
     }
 
     @ArangoApiTest
-    void getResponsibleShard(TestContext ctx, CollectionApiSync collectionApi) {
+    void getResponsibleShard(TestContext ctx, ArangoDatabaseSync database) {
         assumeTrue(ctx.isCluster());
 
         String name = "collection-" + UUID.randomUUID().toString();
-        collectionApi.createCollection(CollectionCreateOptions.builder().name(name).build());
-        String responsibleShard = collectionApi.getResponsibleShard(name, Collections.singletonMap("_key", "aaa"));
+        database.createCollection(CollectionCreateOptions.builder().name(name).build());
+        ArangoCollectionSync collection = database.collection(name);
+        String responsibleShard = collection.responsibleShard(Collections.singletonMap("_key", "aaa"));
         assertThat(responsibleShard).isNotNull();
     }
 
     @ArangoApiTest
-    void getCollectionRevision(CollectionApiSync collectionApi) {
+    void getCollectionRevision(ArangoDatabaseSync database) {
         String name = "collection-" + UUID.randomUUID().toString();
-        collectionApi.createCollection(CollectionCreateOptions.builder().name(name).build());
-        String revision = collectionApi.getCollectionRevision(name);
+        database.createCollection(CollectionCreateOptions.builder().name(name).build());
+        ArangoCollectionSync collection = database.collection(name);
+        String revision = collection.revision();
         assertThat(revision).isNotNull();
     }
 
     @ArangoApiTest
-    void getCollectionShards(TestContext ctx, CollectionApiSync collectionApi) {
+    void getCollectionShards(TestContext ctx, ArangoDatabaseSync database) {
         assumeTrue(ctx.isCluster());
 
         String name = "collection-" + UUID.randomUUID().toString();
-        collectionApi.createCollection(CollectionCreateOptions.builder().name(name).build());
-        List<String> shards = collectionApi.getCollectionShards(name);
+        database.createCollection(CollectionCreateOptions.builder().name(name).build());
+        ArangoCollectionSync collection = database.collection(name);
+        List<String> shards = collection.shards();
         assertThat(shards).isNotNull();
         assertThat(shards).isNotEmpty();
     }
 
     @ArangoApiTest
-    void unloadCollection(CollectionApiSync collectionApi) {
+    void unloadCollection(ArangoDatabaseSync database) {
         String name = "collection-" + UUID.randomUUID().toString();
-        collectionApi.createCollection(CollectionCreateOptions.builder().name(name).build());
-        collectionApi.unloadCollection(name);
+        database.createCollection(CollectionCreateOptions.builder().name(name).build());
+        ArangoCollectionSync collection = database.collection(name);
+        collection.unload();
     }
 
 }

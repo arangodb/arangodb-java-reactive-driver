@@ -37,6 +37,9 @@ public interface TestApi {
     @SyncApiDelegator
     NestedApi nested();
 
+    @SyncApiDelegator
+    Mono<NestedApi> nestedAsync();
+
     default Mono<String> defaultMethod() {
         return Mono.just("defaultMethod");
     }

@@ -1,0 +1,29 @@
+name: SonarCloud
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  sonar:
+
+    timeout-minutes: 30
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Info
+        run: mvn -version
+      - name: Analyze
+        run: mvn -e --no-transfer-progress clean verify sonar:sonar -Dgpg.skip -Dtest.docker.image="docker.io/arangodb/enterprise:3.7.3" -Darango.license.key="$ARANGO_LICENSE_KEY" -Dtestcontainers.reuse.enable=true
+        env:
+          ARANGO_LICENSE_KEY: ${{secrets.ARANGO_LICENSE_KEY}}
+          SONAR_LOGIN: ${{secrets.SONAR_LOGIN}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

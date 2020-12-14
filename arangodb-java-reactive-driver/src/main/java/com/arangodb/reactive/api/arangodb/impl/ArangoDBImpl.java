@@ -23,19 +23,37 @@ package com.arangodb.reactive.api.arangodb.impl;
 
 import com.arangodb.reactive.api.arangodb.ArangoDB;
 import com.arangodb.reactive.api.arangodb.ArangoDBSync;
-import com.arangodb.reactive.api.database.DatabaseApi;
-import com.arangodb.reactive.api.database.impl.DatabaseApiImpl;
+import com.arangodb.reactive.api.database.ArangoDatabase;
+import com.arangodb.reactive.api.database.impl.ArangoDatabaseImpl;
+import com.arangodb.reactive.api.database.options.DatabaseCreateOptions;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
+import com.arangodb.reactive.api.util.ApiPath;
 import com.arangodb.reactive.communication.CommunicationConfig;
+import com.arangodb.reactive.connection.ArangoRequest;
+import com.arangodb.reactive.connection.ArangoResponse;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
+
+import static com.arangodb.reactive.api.util.ArangoResponseField.RESULT_JSON_POINTER;
+import static com.arangodb.reactive.entity.serde.SerdeTypes.STRING_LIST;
 
 /**
  * @author Michele Rastelli
  */
 public final class ArangoDBImpl extends ArangoClientImpl implements ArangoDB {
 
+    private final String adminDB;
+
     public ArangoDBImpl(final CommunicationConfig config) {
         super(config);
+        adminDB = config.getAdministrationDatabase();
+    }
+
+    @Override
+    public String getAdminDB() {
+        return adminDB;
     }
 
     @Override
@@ -44,13 +62,63 @@ public final class ArangoDBImpl extends ArangoClientImpl implements ArangoDB {
     }
 
     @Override
-    public DatabaseApi db() {
-        return db("_system");
+    public ArangoDatabase db() {
+        return db(adminDB);
     }
 
     @Override
-    public DatabaseApi db(final String name) {
-        return new DatabaseApiImpl(this, name);
+    public ArangoDatabase db(final String name) {
+        return new ArangoDatabaseImpl(this, name);
+    }
+
+    @Override
+    public Flux<String> databases() {
+        return getCommunication()
+                .execute(
+                        ArangoRequest.builder()
+                                .database(adminDB)
+                                .requestType(ArangoRequest.RequestType.GET)
+                                .path(ApiPath.DATABASE)
+                                .build()
+                )
+                .map(ArangoResponse::getBody)
+                .map(bytes -> getSerde()
+                        .<List<String>>deserializeAtJsonPointer(RESULT_JSON_POINTER, bytes, STRING_LIST))
+                .flatMapMany(Flux::fromIterable);
+    }
+
+    @Override
+    public Flux<String> accessibleDatabases() {
+        return getCommunication().execute(
+                ArangoRequest.builder()
+                        .database(adminDB)
+                        .requestType(ArangoRequest.RequestType.GET)
+                        .path(ApiPath.DATABASE + "/user")
+                        .build()
+        )
+                .map(ArangoResponse::getBody)
+                .map(bytes -> getSerde()
+                        .<List<String>>deserializeAtJsonPointer(RESULT_JSON_POINTER, bytes, STRING_LIST))
+                .flatMapMany(Flux::fromIterable);
+    }
+
+    @Override
+    public Mono<ArangoDatabase> createDatabase(final String name) {
+        return createDatabase(DatabaseCreateOptions.builder().name(name).build());
+    }
+
+    @Override
+    public Mono<ArangoDatabase> createDatabase(final DatabaseCreateOptions options) {
+        return getCommunication()
+                .execute(
+                        ArangoRequest.builder()
+                                .database(adminDB)
+                                .requestType(ArangoRequest.RequestType.POST)
+                                .path(ApiPath.DATABASE)
+                                .body(getSerde().serialize(options))
+                                .build()
+                )
+                .thenReturn(db(options.getName()));
     }
 
     @Override

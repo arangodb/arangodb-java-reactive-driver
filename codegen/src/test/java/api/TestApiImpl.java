@@ -41,6 +41,11 @@ public class TestApiImpl implements TestApi {
     }
 
     @Override
+    public Mono<NestedApi> nestedAsync() {
+        return Mono.just(nested);
+    }
+
+    @Override
     public Mono<Void> voidMethod() {
         return Mono.empty();
     }

@@ -20,8 +20,8 @@
 
 package com.arangodb.reactive.api.utils;
 
+import com.arangodb.reactive.api.arangodb.ArangoDB;
 import com.arangodb.reactive.api.arangodb.impl.ArangoDBImpl;
-import com.arangodb.reactive.api.database.DatabaseApi;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -42,16 +42,16 @@ public class ArangoApiTestClassExtension implements BeforeAllCallback, AfterAllC
     @Override
     public void afterAll(ExtensionContext context) {
         String dbName = context.getRequiredTestClass().getSimpleName();
-        doForeachTopology(dbApi -> dbApi.dropDatabase(dbName));
+        doForeachTopology(arangoDB -> arangoDB.db(dbName).drop());
     }
 
     @Override
     public void beforeAll(ExtensionContext context) {
         String dbName = context.getRequiredTestClass().getSimpleName();
-        doForeachTopology(dbApi -> dbApi.createDatabase(dbName));
+        doForeachTopology(arangoDB -> arangoDB.createDatabase(dbName));
     }
 
-    private void doForeachTopology(Function<DatabaseApi, Mono<?>> action) {
+    private void doForeachTopology(Function<ArangoDB, Mono<?>> action) {
         Flux
                 .fromStream(
                         contexts.stream()
@@ -60,7 +60,7 @@ public class ArangoApiTestClassExtension implements BeforeAllCallback, AfterAllC
                                 .stream()
                                 .map(ctxList -> new ArangoDBImpl(ctxList.get(0).getConfig()))
                 )
-                .flatMap(testClient -> action.apply(testClient.db()))
+                .flatMap(action::apply)
                 .then().block();
     }
 }

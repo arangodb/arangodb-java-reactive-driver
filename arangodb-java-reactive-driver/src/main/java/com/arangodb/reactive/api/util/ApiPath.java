@@ -1,7 +1,7 @@
 /*
  * DISCLAIMER
  *
- * Copyright 2018 ArangoDB GmbH, Cologne, Germany
+ * Copyright 2016 ArangoDB GmbH, Cologne, Germany
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,12 @@
 package com.arangodb.reactive.api.util;
 
 /**
- * @author Mark Vollmary
+ * @author Michele Rastelli
  */
-public final class ArangoRequestParam {
+public final class ApiPath {
+    public static final String DATABASE = "/_api/database";
+    public static final String COLLECTION = "/_api/collection";
 
-    public static final String DATABASE = "database";
-    public static final String WAIT_FOR_SYNC = "waitForSync";
-    public static final String IF_NONE_MATCH = "If-None-Match";
-    public static final String IF_MATCH = "If-Match";
-    public static final String KEEP_NULL = "keepNull";
-
-    private ArangoRequestParam() {
+    private ApiPath() {
     }
-
 }
