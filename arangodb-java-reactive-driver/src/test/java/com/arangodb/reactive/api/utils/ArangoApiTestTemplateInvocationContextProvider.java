@@ -56,16 +56,31 @@ public class ArangoApiTestTemplateInvocationContextProvider implements TestTempl
     }
 
     private TestTemplateInvocationContext invocationContext(TestContext ctx, ArangoDB testClient) {
-        return new TestTemplateInvocationContext() {
-            @Override
-            public String getDisplayName(int invocationIndex) {
-                return ctx.toString();
-            }
-
-            @Override
-            public List<Extension> getAdditionalExtensions() {
-                return Collections.singletonList(new ArangoApiParameterResolver(ctx, testClient));
-            }
-        };
+        return new InvocationContext(ctx, testClient);
     }
+
+    public static class InvocationContext implements TestTemplateInvocationContext {
+        private TestContext ctx;
+        private ArangoDB testClient;
+
+        public InvocationContext(TestContext ctx, ArangoDB testClient) {
+            this.ctx = ctx;
+            this.testClient = testClient;
+        }
+
+        @Override
+        public String getDisplayName(int invocationIndex) {
+            return ctx.toString();
+        }
+
+        @Override
+        public List<Extension> getAdditionalExtensions() {
+            return Collections.singletonList(new ArangoApiParameterResolver(ctx, testClient));
+        }
+
+        public String getUser() {
+            return ctx.getConfig().getAuthenticationMethod().getUser();
+        }
+    }
+
 }

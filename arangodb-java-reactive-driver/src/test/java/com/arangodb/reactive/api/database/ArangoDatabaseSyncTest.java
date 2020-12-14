@@ -28,6 +28,7 @@ import com.arangodb.reactive.api.entity.ReplicationFactor;
 import com.arangodb.reactive.api.sync.ThreadConversation;
 import com.arangodb.reactive.api.utils.ArangoApiTest;
 import com.arangodb.reactive.api.utils.ArangoApiTestClass;
+import com.arangodb.reactive.api.utils.RootOnly;
 import com.arangodb.reactive.api.utils.TestContext;
 import com.arangodb.reactive.exceptions.server.ArangoServerException;
 
@@ -44,6 +45,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 @ArangoApiTestClass
 class ArangoDatabaseSyncTest {
 
+    @RootOnly
     @ArangoApiTest
     void createDatabase(TestContext ctx, ArangoDBSync arangoDB) {
         String name = "db-" + UUID.randomUUID().toString();
@@ -70,6 +72,7 @@ class ArangoDatabaseSyncTest {
     }
 
 
+    @RootOnly
     @ArangoApiTest
     void createAndDropDatabaseWithOptions(TestContext ctx, ArangoDBSync arangoDB) {
         String name = "db-" + UUID.randomUUID().toString();
@@ -134,6 +137,7 @@ class ArangoDatabaseSyncTest {
         }
     }
 
+    @RootOnly
     @ArangoApiTest
     void getDatabases(ArangoDBSync arangoDB) {
         List<String> databases = arangoDB.databases();
