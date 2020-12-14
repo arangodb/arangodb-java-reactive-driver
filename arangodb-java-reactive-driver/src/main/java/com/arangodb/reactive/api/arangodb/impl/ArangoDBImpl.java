@@ -21,6 +21,7 @@
 
 package com.arangodb.reactive.api.arangodb.impl;
 
+import com.arangodb.reactive.ArangoDefaults;
 import com.arangodb.reactive.api.arangodb.ArangoDB;
 import com.arangodb.reactive.api.arangodb.ArangoDBSync;
 import com.arangodb.reactive.api.database.ArangoDatabase;
@@ -48,7 +49,7 @@ public final class ArangoDBImpl extends ArangoClientImpl implements ArangoDB {
 
     public ArangoDBImpl(final CommunicationConfig config) {
         super(config);
-        adminDB = config.getAdministrationDatabase();
+        adminDB = config.getAdminDB();
     }
 
     @Override
@@ -76,7 +77,7 @@ public final class ArangoDBImpl extends ArangoClientImpl implements ArangoDB {
         return getCommunication()
                 .execute(
                         ArangoRequest.builder()
-                                .database(adminDB)
+                                .database(ArangoDefaults.SYSTEM_DB)
                                 .requestType(ArangoRequest.RequestType.GET)
                                 .path(ApiPath.DATABASE)
                                 .build()
@@ -112,7 +113,7 @@ public final class ArangoDBImpl extends ArangoClientImpl implements ArangoDB {
         return getCommunication()
                 .execute(
                         ArangoRequest.builder()
-                                .database(adminDB)
+                                .database(ArangoDefaults.SYSTEM_DB)
                                 .requestType(ArangoRequest.RequestType.POST)
                                 .path(ApiPath.DATABASE)
                                 .body(getSerde().serialize(options))

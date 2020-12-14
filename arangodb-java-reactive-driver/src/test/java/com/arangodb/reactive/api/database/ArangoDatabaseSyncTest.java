@@ -120,13 +120,12 @@ class ArangoDatabaseSyncTest {
 
 
     @ArangoApiTest
-    void getDatabase(TestContext ctx, ArangoDBSync arangoDB) {
-        DatabaseEntity dbEntity = arangoDB.db("_system").info();
+    void getInfo(TestContext ctx, ArangoDBSync arangoDB) {
+        DatabaseEntity dbEntity = arangoDB.db(arangoDB.getAdminDB()).info();
 
         assertThat(dbEntity.getId()).isNotNull();
-        assertThat(dbEntity.getName()).isEqualTo("_system");
+        assertThat(dbEntity.getName()).isEqualTo(arangoDB.getAdminDB());
         assertThat(dbEntity.getPath()).isNotNull();
-        assertThat(dbEntity.isSystem()).isTrue();
 
         if (ctx.isCluster() && ctx.isAtLeastVersion(3, 6)) {
             assertThat(dbEntity.getWriteConcern()).isEqualTo(1);
@@ -139,14 +138,14 @@ class ArangoDatabaseSyncTest {
     void getDatabases(ArangoDBSync arangoDB) {
         List<String> databases = arangoDB.databases();
         assertThat(databases).isNotNull();
-        assertThat(databases).contains("_system");
+        assertThat(databases).contains(arangoDB.getAdminDB());
     }
 
     @ArangoApiTest
     void getAccessibleDatabases(ArangoDBSync arangoDB) {
         List<String> databases = arangoDB.accessibleDatabases();
         assertThat(databases).isNotNull();
-        assertThat(databases).contains("_system");
+        assertThat(databases).contains(arangoDB.getAdminDB());
     }
 
 }

@@ -24,6 +24,7 @@ package com.arangodb.reactive.api.utils;
 import com.arangodb.reactive.communication.ArangoTopology;
 import com.arangodb.reactive.communication.CommunicationConfig;
 import com.arangodb.reactive.connection.ArangoProtocol;
+import com.arangodb.reactive.connection.AuthenticationMethod;
 import com.arangodb.reactive.connection.ConnectionConfig;
 import com.arangodb.reactive.connection.ContentType;
 import deployments.ContainerDeployment;
@@ -41,13 +42,12 @@ import java.util.stream.Stream;
  */
 public class TestContext {
 
+    public final static String USER_DB = "userDb";
+    public final static String USER_NAME = "user";
+    public final static String USER_PASSWD = "test";
+
     private final ContainerDeployment deployment;
     private final CommunicationConfig config;
-
-    private TestContext(final ContainerDeployment deployment, final CommunicationConfig config) {
-        this.deployment = deployment;
-        this.config = config;
-    }
 
     public static Stream<TestContext> createContexts(final ContainerDeployment deployment) {
         List<Map.Entry<ArangoProtocol, ContentType>> contexts = new ArrayList<>();
@@ -61,19 +61,37 @@ public class TestContext {
         }
 
         return contexts.stream()
-                .map(it -> CommunicationConfig.builder()
-                        .protocol(it.getKey())
-                        .contentType(it.getValue())
-                        .addAllHosts(deployment.getHosts())
-                        .authenticationMethod(deployment.getAuthentication())
-                        .topology(deployment.getTopology())
-                        .connectionConfig(ConnectionConfig
-                                .builder()
-                                .timeout(Duration.ofMillis(TestUtils.INSTANCE.getRequestTimeout()))
-                                .build())
-                        .build()
+                .flatMap(it -> {
+                            CommunicationConfig rootConfig = CommunicationConfig.builder()
+                                    .protocol(it.getKey())
+                                    .contentType(it.getValue())
+                                    .addAllHosts(deployment.getHosts())
+                                    .authenticationMethod(deployment.getAuthentication())
+                                    .topology(deployment.getTopology())
+                                    .connectionConfig(ConnectionConfig
+                                            .builder()
+                                            .timeout(Duration.ofMillis(TestUtils.INSTANCE.getRequestTimeout()))
+                                            .build())
+                                    .build();
+
+                            CommunicationConfig userConfig = CommunicationConfig.builder().from(rootConfig)
+                                    .authenticationMethod(AuthenticationMethod.ofBasic(USER_NAME, USER_PASSWD))
+                                    .adminDB(USER_DB)
+                                    .build();
+
+                            return Stream.of(rootConfig, userConfig);
+                        }
                 )
                 .map(config -> new TestContext(deployment, config));
+    }
+
+    private TestContext(final ContainerDeployment deployment, final CommunicationConfig config) {
+        this.deployment = deployment;
+        this.config = config;
+    }
+
+    public ContainerDeployment getDeployment() {
+        return deployment;
     }
 
     public CommunicationConfig getConfig() {
@@ -95,6 +113,7 @@ public class TestContext {
     @Override
     public String toString() {
         return deployment.getTopology() + ", " +
+                config.getAuthenticationMethod().getUser() + ", " +
                 config.getProtocol() + ", " +
                 config.getContentType();
     }
