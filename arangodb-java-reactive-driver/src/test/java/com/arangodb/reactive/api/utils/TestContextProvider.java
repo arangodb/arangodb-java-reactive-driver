@@ -20,22 +20,20 @@
 
 package com.arangodb.reactive.api.utils;
 
-import com.arangodb.reactive.api.arangodb.ArangoDB;
+import com.arangodb.reactive.api.arangodb.ArangoDBSync;
 import com.arangodb.reactive.api.arangodb.impl.ArangoDBImpl;
 import com.arangodb.reactive.api.database.options.DatabaseCreateOptions;
 import com.arangodb.reactive.exceptions.ArangoException;
 import deployments.ContainerDeployment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import utils.TestUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -85,17 +83,21 @@ public enum TestContextProvider implements Supplier<List<TestContext>> {
                     .flatMap(TestContext::createContexts)
                     .collect(Collectors.toList());
 
-            doForeachDeployment(contexts, arangoDB -> arangoDB.db(TestContext.USER_DB).info().then()
-                    .onErrorResume(ArangoException.class, e ->
+            // create user and userDB
+            doForeachDeployment(arangoDB -> {
+                        try {
+                            arangoDB.db(TestContext.USER_DB).info();
+                        } catch (ArangoException e) {
                             arangoDB.createDatabase(DatabaseCreateOptions.builder()
                                     .name(TestContext.USER_DB)
                                     .addUsers(DatabaseCreateOptions.DatabaseUser.builder()
                                             .username(TestContext.USER_NAME)
                                             .passwd(TestContext.USER_PASSWD)
                                             .build())
-                                    .build())
-                                    .then()
-                    )
+                                    .build());
+                        }
+                    }
+
             );
 
             long end = new Date().getTime();
@@ -112,21 +114,13 @@ public enum TestContextProvider implements Supplier<List<TestContext>> {
         return contexts;
     }
 
-    public static void doForeachDeployment(Function<ArangoDB, Mono<?>> action) {
-        doForeachDeployment(TestContextProvider.INSTANCE.get(), action);
-    }
-
-    private static void doForeachDeployment(List<TestContext> contexts, Function<ArangoDB, Mono<?>> action) {
-        Flux
-                .fromStream(
-                        contexts.stream()
-                                .collect(Collectors.groupingBy(TestContext::getDeployment))
-                                .values()
-                                .stream()
-                                .map(ctxList -> new ArangoDBImpl(ctxList.get(0).getConfig()))
-                )
-                .flatMap(action::apply)
-                .then().block();
+    public void doForeachDeployment(Consumer<ArangoDBSync> action) {
+        contexts.stream()
+                .collect(Collectors.groupingBy(TestContext::getDeployment))
+                .values()
+                .stream()
+                .map(ctxList -> new ArangoDBImpl(ctxList.get(0).getConfig()).sync())
+                .forEach(action);
     }
 
 }

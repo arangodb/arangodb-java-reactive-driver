@@ -33,13 +33,13 @@ public class ArangoApiTestClassExtension implements BeforeAllCallback, AfterAllC
     @Override
     public void afterAll(ExtensionContext context) {
         String dbName = context.getRequiredTestClass().getSimpleName();
-        TestContextProvider.doForeachDeployment(arangoDB -> arangoDB.db(dbName).drop());
+        TestContextProvider.INSTANCE.doForeachDeployment(arangoDB -> arangoDB.db(dbName).drop());
     }
 
     @Override
     public void beforeAll(ExtensionContext context) {
         String dbName = context.getRequiredTestClass().getSimpleName();
-        TestContextProvider.doForeachDeployment(arangoDB -> arangoDB.createDatabase(
+        TestContextProvider.INSTANCE.doForeachDeployment(arangoDB -> arangoDB.createDatabase(
                 DatabaseCreateOptions.builder()
                 .name(dbName)
                         .addUsers(DatabaseCreateOptions.DatabaseUser.builder()
