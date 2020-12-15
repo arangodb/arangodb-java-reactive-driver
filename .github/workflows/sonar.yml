@@ -10,7 +10,6 @@ jobs:
   sonar:
 
     timeout-minutes: 30
-    needs: test
     runs-on: ubuntu-latest
 
     steps:
