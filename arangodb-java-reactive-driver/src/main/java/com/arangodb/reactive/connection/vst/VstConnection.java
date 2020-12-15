@@ -37,6 +37,7 @@ import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 import reactor.netty.Connection;
 import reactor.netty.DisposableChannel;
 import reactor.netty.channel.AbortedException;
@@ -100,7 +101,7 @@ public final class VstConnection extends ArangoConnection {
             throw new IllegalStateException("Already initialized!");
         }
         initialized = true;
-        return publishOnScheduler(this::connect).timeout(config.getTimeout())
+        return subscribeOnScheduler(this::connect).timeout(config.getTimeout())
                 .then(Mono.defer(this::checkAuthenticated))
                 .map(it -> this);
     }
@@ -108,18 +109,19 @@ public final class VstConnection extends ArangoConnection {
     @Override
     public Mono<ArangoResponse> execute(final ArangoRequest request) {
         LOGGER.debug("execute({})", request);
-        return publishOnScheduler(this::connect)
+        return subscribeOnScheduler(this::connect)
                 .flatMap(c -> {
                     final long id = increaseAndGetMessageCounter();
                     return execute(c, id, RequestConverter.encodeRequest(id, request, config.getChunkSize()));
                 })
                 .timeout(config.getTimeout())
-                .doOnError(this::handleError);
+                .doOnError(this::handleError)
+                .publishOn(Schedulers.boundedElastic());
     }
 
     @Override
     public Mono<Boolean> isConnected() {
-        return publishOnScheduler(() -> {
+        return subscribeOnScheduler(() -> {
             if (connectionState == ConnectionState.CONNECTED) {
                 // double check if it is still connected
                 return requestUser()
@@ -128,7 +130,7 @@ public final class VstConnection extends ArangoConnection {
             } else {
                 return Mono.just(false);
             }
-        });
+        }).publishOn(Schedulers.boundedElastic());
     }
 
     @Override
@@ -138,11 +140,11 @@ public final class VstConnection extends ArangoConnection {
         }
         closing = true;
 
-        return publishOnScheduler(() -> {
+        return subscribeOnScheduler(() -> {
             assertCorrectThread();
             LOGGER.debug("close()");
             if (connectionState == ConnectionState.DISCONNECTED) {
-                return publishOnScheduler(vstReceiver::shutDown);
+                return subscribeOnScheduler(vstReceiver::shutDown);
             } else {
                 return session.asMono()
                         .doOnNext(DisposableChannel::dispose)
@@ -151,7 +153,8 @@ public final class VstConnection extends ArangoConnection {
                         .doFinally(s -> vstReceiver.shutDown())
                         .then(closed.asMono());
             }
-        });
+        })
+                .publishOn(Schedulers.boundedElastic());
     }
 
     private long increaseAndGetMessageCounter() {
@@ -179,11 +182,12 @@ public final class VstConnection extends ArangoConnection {
                             config.getChunkSize()
                     );
                     return execute(connection, id, buffer)
-                            .doOnNext(response -> {
+                            .map(response -> {
                                 if (response.getResponseCode() != HttpResponseStatus.OK.code()) {
                                     LOGGER.warn("in authenticate(): received response {}", response);
                                     throw ArangoConnectionAuthenticationException.of(response);
                                 }
+                                return response;
                             })
                             .then();
                 })
@@ -205,11 +209,12 @@ public final class VstConnection extends ArangoConnection {
         return Mono.defer(() ->
                 // perform a request to check if credentials are ok
                 requestUser()
-                        .doOnNext(response -> {
+                        .map(response -> {
                             if (response.getResponseCode() == HttpResponseStatus.UNAUTHORIZED.code()
                                     || response.getResponseCode() == HttpResponseStatus.FORBIDDEN.code()) {
                                 throw ArangoConnectionAuthenticationException.of(response);
                             }
+                            return response;
                         })
         );
     }
@@ -221,14 +226,14 @@ public final class VstConnection extends ArangoConnection {
      * @param <T>  type returned
      * @return the supplied mono
      */
-    private <T> Mono<T> publishOnScheduler(final Supplier<Mono<T>> task) {
+    private <T> Mono<T> subscribeOnScheduler(final Supplier<Mono<T>> task) {
         if (scheduler.isDisposed()) {
             return Mono.error(new IllegalStateException("Scheduler has been disposed!"));
         }
         return Mono.defer(task).subscribeOn(scheduler);
     }
 
-    private Mono<Void> publishOnScheduler(final Runnable task) {
+    private Mono<Void> subscribeOnScheduler(final Runnable task) {
         if (scheduler.isDisposed()) {
             return Mono.error(new IllegalStateException("Scheduler has been disposed!"));
         }
@@ -263,7 +268,7 @@ public final class VstConnection extends ArangoConnection {
 
     private void handleError(final Throwable t) {
         LOGGER.atDebug().addArgument(() -> t.getClass().getSimpleName()).log("handleError({})");
-        publishOnScheduler(() -> {
+        subscribeOnScheduler(() -> {
             assertCorrectThread();
             if (connectionState == ConnectionState.DISCONNECTED) {
                 return;

@@ -139,7 +139,7 @@ final class ArangoCommunicationImpl implements ArangoCommunication {
                         .addArgument(response)
                         .addArgument(() -> serde.toJsonString(response.getBody()))
                         .log("received response: {}, {}"))
-                .doOnNext(this::checkError);
+                .map(this::checkError);
     }
 
     @Override
@@ -167,9 +167,11 @@ final class ArangoCommunicationImpl implements ArangoCommunication {
         );
     }
 
-    private void checkError(final ArangoResponse response) {
+    private ArangoResponse checkError(final ArangoResponse response) {
         if (response.getResponseCode() < 200 || response.getResponseCode() >= 300) {
             throw buildError(response);
+        } else {
+            return response;
         }
     }
 
