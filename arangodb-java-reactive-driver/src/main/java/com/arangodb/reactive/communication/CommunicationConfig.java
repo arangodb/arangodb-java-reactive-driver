@@ -51,7 +51,7 @@ public interface CommunicationConfig {
      * {@link com.arangodb.reactive.api.arangodb.ArangoDB} will be scoped to this database.
      */
     @Value.Default
-    default String getAdministrationDatabase() {
+    default String getAdminDB() {
         return ArangoDefaults.SYSTEM_DB;
     }
 

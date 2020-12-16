@@ -20,23 +20,15 @@
 
 package com.arangodb.reactive.api.utils;
 
-import com.arangodb.reactive.api.arangodb.ArangoDB;
-import com.arangodb.reactive.api.arangodb.impl.ArangoDBImpl;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.params.provider.ArgumentsProvider;
-
-import java.util.stream.Stream;
-
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Michele Rastelli
  */
-public class ArangoDBProvider implements ArgumentsProvider {
-
-    @Override
-    public Stream<TypedArguments<ArangoDB>> provideArguments(ExtensionContext context) {
-        return TestContextProvider.INSTANCE.get().stream()
-                .map(ctx -> TypedArguments.of(ctx, new ArangoDBImpl(ctx.getConfig())));
-    }
-
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface RootOnly {
 }

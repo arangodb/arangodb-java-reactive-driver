@@ -20,47 +20,32 @@
 
 package com.arangodb.reactive.api.utils;
 
-import com.arangodb.reactive.api.arangodb.ArangoDB;
-import com.arangodb.reactive.api.arangodb.impl.ArangoDBImpl;
+import com.arangodb.reactive.api.database.options.DatabaseCreateOptions;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * @author Michele Rastelli
  */
 public class ArangoApiTestClassExtension implements BeforeAllCallback, AfterAllCallback {
 
-    private final static List<TestContext> contexts = TestContextProvider.INSTANCE.get();
-
     @Override
     public void afterAll(ExtensionContext context) {
         String dbName = context.getRequiredTestClass().getSimpleName();
-        doForeachTopology(arangoDB -> arangoDB.db(dbName).drop());
+        TestContextProvider.INSTANCE.doForeachDeployment(arangoDB -> arangoDB.db(dbName).drop());
     }
 
     @Override
     public void beforeAll(ExtensionContext context) {
         String dbName = context.getRequiredTestClass().getSimpleName();
-        doForeachTopology(arangoDB -> arangoDB.createDatabase(dbName));
+        TestContextProvider.INSTANCE.doForeachDeployment(arangoDB -> arangoDB.createDatabase(
+                DatabaseCreateOptions.builder()
+                .name(dbName)
+                        .addUsers(DatabaseCreateOptions.DatabaseUser.builder()
+                                .username(TestContext.USER_NAME)
+                                .build())
+                        .build()));
     }
 
-    private void doForeachTopology(Function<ArangoDB, Mono<?>> action) {
-        Flux
-                .fromStream(
-                        contexts.stream()
-                                .collect(Collectors.groupingBy(it -> it.getConfig().getTopology()))
-                                .values()
-                                .stream()
-                                .map(ctxList -> new ArangoDBImpl(ctxList.get(0).getConfig()))
-                )
-                .flatMap(action::apply)
-                .then().block();
-    }
 }

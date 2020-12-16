@@ -35,5 +35,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @TestTemplate
 @ExtendWith(ArangoApiTestTemplateInvocationContextProvider.class)
+@ExtendWith(RootOnlyExecutionCondition.class)
 public @interface ArangoApiTest {
 }

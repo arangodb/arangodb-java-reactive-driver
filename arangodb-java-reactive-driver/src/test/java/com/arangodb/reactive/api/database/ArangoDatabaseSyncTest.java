@@ -28,6 +28,7 @@ import com.arangodb.reactive.api.entity.ReplicationFactor;
 import com.arangodb.reactive.api.sync.ThreadConversation;
 import com.arangodb.reactive.api.utils.ArangoApiTest;
 import com.arangodb.reactive.api.utils.ArangoApiTestClass;
+import com.arangodb.reactive.api.utils.RootOnly;
 import com.arangodb.reactive.api.utils.TestContext;
 import com.arangodb.reactive.exceptions.server.ArangoServerException;
 
@@ -44,6 +45,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 @ArangoApiTestClass
 class ArangoDatabaseSyncTest {
 
+    @RootOnly
     @ArangoApiTest
     void createDatabase(TestContext ctx, ArangoDBSync arangoDB) {
         String name = "db-" + UUID.randomUUID().toString();
@@ -70,6 +72,7 @@ class ArangoDatabaseSyncTest {
     }
 
 
+    @RootOnly
     @ArangoApiTest
     void createAndDropDatabaseWithOptions(TestContext ctx, ArangoDBSync arangoDB) {
         String name = "db-" + UUID.randomUUID().toString();
@@ -120,13 +123,12 @@ class ArangoDatabaseSyncTest {
 
 
     @ArangoApiTest
-    void getDatabase(TestContext ctx, ArangoDBSync arangoDB) {
-        DatabaseEntity dbEntity = arangoDB.db("_system").info();
+    void getInfo(TestContext ctx, ArangoDBSync arangoDB) {
+        DatabaseEntity dbEntity = arangoDB.db(arangoDB.getAdminDB()).info();
 
         assertThat(dbEntity.getId()).isNotNull();
-        assertThat(dbEntity.getName()).isEqualTo("_system");
+        assertThat(dbEntity.getName()).isEqualTo(arangoDB.getAdminDB());
         assertThat(dbEntity.getPath()).isNotNull();
-        assertThat(dbEntity.isSystem()).isTrue();
 
         if (ctx.isCluster() && ctx.isAtLeastVersion(3, 6)) {
             assertThat(dbEntity.getWriteConcern()).isEqualTo(1);
@@ -135,18 +137,19 @@ class ArangoDatabaseSyncTest {
         }
     }
 
+    @RootOnly
     @ArangoApiTest
     void getDatabases(ArangoDBSync arangoDB) {
         List<String> databases = arangoDB.databases();
         assertThat(databases).isNotNull();
-        assertThat(databases).contains("_system");
+        assertThat(databases).contains(arangoDB.getAdminDB());
     }
 
     @ArangoApiTest
     void getAccessibleDatabases(ArangoDBSync arangoDB) {
         List<String> databases = arangoDB.accessibleDatabases();
         assertThat(databases).isNotNull();
-        assertThat(databases).contains("_system");
+        assertThat(databases).contains(arangoDB.getAdminDB());
     }
 
 }
