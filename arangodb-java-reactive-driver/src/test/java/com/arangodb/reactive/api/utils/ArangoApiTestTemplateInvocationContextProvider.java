@@ -78,8 +78,8 @@ public class ArangoApiTestTemplateInvocationContextProvider implements TestTempl
             return Collections.singletonList(new ArangoApiParameterResolver(ctx, testClient));
         }
 
-        public String getUser() {
-            return ctx.getConfig().getAuthenticationMethod().getUser();
+        public String getAdminDB() {
+            return ctx.getConfig().getAdminDB();
         }
     }
 

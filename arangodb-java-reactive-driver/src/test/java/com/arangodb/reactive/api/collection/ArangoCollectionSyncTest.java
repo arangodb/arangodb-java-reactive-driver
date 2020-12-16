@@ -227,7 +227,7 @@ class ArangoCollectionSyncTest {
 
     @ArangoApiTest
     void renameCollection(TestContext ctx, ArangoDatabaseSync database) {
-        assumeTrue(!ctx.isCluster());
+        assumeTrue(!ctx.isCluster(), "is not cluster");
 
         String name = "collection-" + UUID.randomUUID().toString();
 
@@ -258,7 +258,7 @@ class ArangoCollectionSyncTest {
 
     @ArangoApiTest
     void getCollectionChecksum(TestContext ctx, ArangoDatabaseSync database) {
-        assumeTrue(!ctx.isCluster());
+        assumeTrue(!ctx.isCluster(), "is not cluster");
 
         String name = "collection-" + UUID.randomUUID().toString();
         database.createCollection(CollectionCreateOptions.builder().name(name).build());
@@ -304,7 +304,7 @@ class ArangoCollectionSyncTest {
 
     @ArangoApiTest
     void getResponsibleShard(TestContext ctx, ArangoDatabaseSync database) {
-        assumeTrue(ctx.isCluster());
+        assumeTrue(ctx.isCluster(), "is cluster");
 
         String name = "collection-" + UUID.randomUUID().toString();
         database.createCollection(CollectionCreateOptions.builder().name(name).build());
@@ -324,7 +324,7 @@ class ArangoCollectionSyncTest {
 
     @ArangoApiTest
     void getCollectionShards(TestContext ctx, ArangoDatabaseSync database) {
-        assumeTrue(ctx.isCluster());
+        assumeTrue(ctx.isCluster(), "is cluster");
 
         String name = "collection-" + UUID.randomUUID().toString();
         database.createCollection(CollectionCreateOptions.builder().name(name).build());

@@ -36,14 +36,14 @@ public class RootOnlyExecutionCondition implements ExecutionCondition {
 
     @Override
     public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
-        if (context.getTestMethod().get().isAnnotationPresent(RootOnly.class)) {
+        if (context.getTestMethod().get().isAnnotationPresent(SystemDBOnly.class)) {
             TestTemplateInvocationContext ic = getInvocationContext(context);
             if (ic instanceof ArangoApiTestTemplateInvocationContextProvider.InvocationContext) {
-                if (!"root".equals(((ArangoApiTestTemplateInvocationContextProvider.InvocationContext) ic).getUser()))
-                    return ConditionEvaluationResult.disabled("@RootOnly");
+                if (!"_system".equals(((ArangoApiTestTemplateInvocationContextProvider.InvocationContext) ic).getAdminDB()))
+                    return ConditionEvaluationResult.disabled("@SystemDBOnly: test disabled.");
             }
         }
-        return ConditionEvaluationResult.enabled("No @RootOnly annotation found, test enabled.");
+        return ConditionEvaluationResult.enabled("No @SystemDBOnly annotation found, test enabled.");
     }
 
     private TestTemplateInvocationContext getInvocationContext(ExtensionContext context) {
