@@ -30,7 +30,7 @@ Code coverage report is generated here: [target/site/jacoco/index.html](target/s
 
 To specify the docker image to use in tests:
 ```shell script
-mvn test -Dtest.docker.image="docker.io/arangodb/arangodb:3.7.2"
+mvn test -Dtest.docker.image="docker.io/arangodb/arangodb:3.7.5"
 ```
 
 ### enterprise license
@@ -38,7 +38,7 @@ mvn test -Dtest.docker.image="docker.io/arangodb/arangodb:3.7.2"
 When testing against an enterprise docker image, a license key must be specified (also an evaluation one is fine):
 
 ```shell script
-mvn test -Dtest.docker.image="docker.io/arangodb/enterprise:3.7.2" -Darango.license.key="<ARANGO_LICENSE_KEY>"
+mvn test -Dtest.docker.image="docker.io/arangodb/enterprise:3.7.5" -Darango.license.key="<ARANGO_LICENSE_KEY>"
 ```
 
 ### reuse test containers

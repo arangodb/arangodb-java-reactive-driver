@@ -5,7 +5,7 @@
 #   ./start_db_single.sh <dockerImage>
 
 # EXAMPLE:
-#   ./start_db_single.sh docker.io/arangodb/arangodb:3.7.2
+#   ./start_db_single.sh docker.io/arangodb/arangodb:3.7.5
 
 docker pull "$1"
 

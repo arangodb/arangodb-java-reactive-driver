@@ -5,7 +5,7 @@
 #   ./start_active_failover.sh <dockerImage>
 
 # EXAMPLE:
-#   ./start_active_failover.sh docker.io/arangodb/arangodb:3.7.2
+#   ./start_active_failover.sh docker.io/arangodb/arangodb:3.7.5
 
 docker pull "$1"
 
