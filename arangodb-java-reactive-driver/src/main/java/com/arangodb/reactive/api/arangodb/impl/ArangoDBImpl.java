@@ -21,6 +21,7 @@
 
 package com.arangodb.reactive.api.arangodb.impl;
 
+import com.arangodb.reactive.ArangoConfig;
 import com.arangodb.reactive.ArangoDefaults;
 import com.arangodb.reactive.api.arangodb.ArangoDB;
 import com.arangodb.reactive.api.arangodb.ArangoDBSync;
@@ -29,7 +30,6 @@ import com.arangodb.reactive.api.database.impl.ArangoDatabaseImpl;
 import com.arangodb.reactive.api.database.options.DatabaseCreateOptions;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
 import com.arangodb.reactive.api.util.ApiPath;
-import com.arangodb.reactive.communication.CommunicationConfig;
 import com.arangodb.reactive.connection.ArangoRequest;
 import com.arangodb.reactive.connection.ArangoResponse;
 import reactor.core.publisher.Flux;
@@ -47,8 +47,8 @@ public final class ArangoDBImpl extends ArangoClientImpl implements ArangoDB {
 
     private final String adminDB;
 
-    public ArangoDBImpl(final CommunicationConfig config) {
-        super(config);
+    public ArangoDBImpl(final ArangoConfig config) {
+        super(config.getCommunicationConfig());
         adminDB = config.getAdminDB();
     }
 

@@ -21,6 +21,7 @@
 package com.arangodb.reactive.api.utils;
 
 
+import com.arangodb.reactive.ArangoConfig;
 import com.arangodb.reactive.communication.ArangoTopology;
 import com.arangodb.reactive.communication.CommunicationConfig;
 import com.arangodb.reactive.connection.ArangoProtocol;
@@ -47,7 +48,7 @@ public class TestContext {
     public final static String USER_PASSWD = "test";
 
     private final ContainerDeployment deployment;
-    private final CommunicationConfig config;
+    private final ArangoConfig config;
 
     public static Stream<TestContext> createContexts(final ContainerDeployment deployment) {
         List<Map.Entry<ArangoProtocol, ContentType>> contexts = new ArrayList<>();
@@ -62,7 +63,8 @@ public class TestContext {
 
         return contexts.stream()
                 .flatMap(it -> {
-                            CommunicationConfig rootConfig = CommunicationConfig.builder()
+                    ArangoConfig rootConfig = ArangoConfig.builder()
+                            .communicationConfig(CommunicationConfig.builder()
                                     .protocol(it.getKey())
                                     .contentType(it.getValue())
                                     .addAllHosts(deployment.getHosts())
@@ -72,12 +74,15 @@ public class TestContext {
                                             .builder()
                                             .timeout(Duration.ofMillis(TestUtils.INSTANCE.getRequestTimeout()))
                                             .build())
-                                    .build();
+                                    .build())
+                            .build();
 
-                            CommunicationConfig userConfig = CommunicationConfig.builder().from(rootConfig)
+                    ArangoConfig userConfig = ArangoConfig.builder()
+                            .adminDB(USER_DB)
+                            .communicationConfig(CommunicationConfig.builder().from(rootConfig.getCommunicationConfig())
                                     .authenticationMethod(AuthenticationMethod.ofBasic(USER_NAME, USER_PASSWD))
-                                    .adminDB(USER_DB)
-                                    .build();
+                                    .build())
+                            .build();
 
                             return Stream.of(rootConfig, userConfig);
                         }
@@ -85,7 +90,7 @@ public class TestContext {
                 .map(config -> new TestContext(deployment, config));
     }
 
-    private TestContext(final ContainerDeployment deployment, final CommunicationConfig config) {
+    private TestContext(final ContainerDeployment deployment, final ArangoConfig config) {
         this.deployment = deployment;
         this.config = config;
     }
@@ -94,7 +99,7 @@ public class TestContext {
         return deployment;
     }
 
-    public CommunicationConfig getConfig() {
+    public ArangoConfig getConfig() {
         return config;
     }
 
@@ -113,9 +118,9 @@ public class TestContext {
     @Override
     public String toString() {
         return deployment.getTopology() + ", " +
-                config.getAuthenticationMethod().getUser() + ", " +
-                config.getProtocol() + ", " +
-                config.getContentType();
+                config.getCommunicationConfig().getAuthenticationMethod().getUser() + ", " +
+                config.getCommunicationConfig().getProtocol() + ", " +
+                config.getCommunicationConfig().getContentType();
     }
 
 }

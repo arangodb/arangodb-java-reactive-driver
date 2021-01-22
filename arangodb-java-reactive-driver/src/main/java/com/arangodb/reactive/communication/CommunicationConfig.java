@@ -21,7 +21,6 @@
 package com.arangodb.reactive.communication;
 
 
-import com.arangodb.reactive.ArangoDefaults;
 import com.arangodb.reactive.connection.ArangoProtocol;
 import com.arangodb.reactive.connection.AuthenticationMethod;
 import com.arangodb.reactive.connection.ConnectionConfig;
@@ -42,17 +41,6 @@ import java.util.Set;
 public interface CommunicationConfig {
     static CommunicationConfigBuilder builder() {
         return new CommunicationConfigBuilder();
-    }
-
-    /**
-     * // TODO: create class ArangoConfig and move this field there
-     *
-     * @return database to use for administration requests. All requests performed from
-     * {@link com.arangodb.reactive.api.arangodb.ArangoDB} will be scoped to this database.
-     */
-    @Value.Default
-    default String getAdminDB() {
-        return ArangoDefaults.SYSTEM_DB;
     }
 
     /**
