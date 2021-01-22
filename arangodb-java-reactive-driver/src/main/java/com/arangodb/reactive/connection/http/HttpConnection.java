@@ -25,7 +25,6 @@ import com.arangodb.reactive.connection.ArangoRequest;
 import com.arangodb.reactive.connection.ArangoResponse;
 import com.arangodb.reactive.connection.AuthenticationMethod;
 import com.arangodb.reactive.connection.ConnectionConfig;
-import com.arangodb.reactive.connection.ContentType;
 import com.arangodb.reactive.connection.HostDescription;
 import com.arangodb.reactive.connection.IOUtils;
 import com.arangodb.reactive.connection.exceptions.ArangoConnectionAuthenticationException;
@@ -56,7 +55,7 @@ abstract class HttpConnection extends ArangoConnection {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpConnection.class);
 
-    private static final String CONTENT_TYPE_APPLICATION_JSON = "application/json; charset=UTF-8";
+    private static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
     private static final String CONTENT_TYPE_VPACK = "application/x-velocypack";
 
     private final HostDescription host;
@@ -228,13 +227,7 @@ abstract class HttpConnection extends ArangoConnection {
         return cookieStore.addCookies(client)
                 .headers(headers -> {
                     headers.set(HttpHeaderNames.CONTENT_LENGTH, bodyLength);
-                    if (config.getContentType() == ContentType.VPACK) {
-                        headers.set(HttpHeaderNames.ACCEPT, CONTENT_TYPE_VPACK);
-                    } else if (config.getContentType() == ContentType.JSON) {
-                        headers.set(HttpHeaderNames.ACCEPT, "application/json");
-                    } else {
-                        throw new IllegalArgumentException();
-                    }
+                    headers.set(HttpHeaderNames.ACCEPT, getContentType());
                     addHeaders(request, headers);
                     if (bodyLength > 0) {
                         headers.set(HttpHeaderNames.CONTENT_TYPE, getContentType());
