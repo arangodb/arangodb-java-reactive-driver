@@ -27,10 +27,12 @@ import com.arangodb.reactive.connection.ConnectionConfig;
 import com.arangodb.reactive.connection.ContentType;
 import com.arangodb.reactive.connection.HostDescription;
 import com.arangodb.reactive.entity.GenerateBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -73,10 +75,17 @@ public interface CommunicationConfig {
         return ConnectionConfig.builder().build();
     }
 
+    // TODO: mv to ArangoConfiguration
     @Value.Default
     default ContentType getContentType() {
         return ContentType.VPACK;
     }
+
+    /**
+     * @return a custom mapper to use for user data serialization and deserialization. In case {@link #getContentType()}
+     * is {@code ContentType.VPACK}, then the mapper must be instance of {@code VPackMapper}
+     */
+    Optional<ObjectMapper> getMapper();
 
     /**
      * @return network protocol
@@ -137,6 +146,7 @@ public interface CommunicationConfig {
     /**
      * @return the authenticationMethod to use
      */
+    // TODO: refactor to Optional<AuthenticationMethod>
     @Nullable
     AuthenticationMethod getAuthenticationMethod();
 

@@ -26,10 +26,14 @@ import com.arangodb.velocypack.VPackSlice;
 /**
  * @author Michele Rastelli
  */
-public final class VPackSerde extends ArangoSerde {
+final class VPackSerde extends ArangoSerde {
 
-    public VPackSerde() {
+    VPackSerde() {
         super(new VPackMapper());
+    }
+
+    VPackSerde(final VPackMapper mapper) {
+        super(mapper);
     }
 
     @Override

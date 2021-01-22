@@ -20,6 +20,7 @@
 
 package com.arangodb.reactive.entity.serde;
 
+import com.arangodb.jackson.dataformat.velocypack.VPackMapper;
 import com.arangodb.reactive.connection.ContentType;
 import com.arangodb.reactive.exceptions.SerdeException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -56,6 +57,14 @@ public abstract class ArangoSerde {
                 return new JsonSerde();
             default:
                 throw new IllegalArgumentException(String.valueOf(contentType));
+        }
+    }
+
+    public static ArangoSerde create(final ObjectMapper objectMapper) {
+        if (objectMapper instanceof VPackMapper) {
+            return new VPackSerde((VPackMapper) objectMapper);
+        } else {
+            return new JsonSerde(objectMapper);
         }
     }
 

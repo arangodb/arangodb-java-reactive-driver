@@ -21,16 +21,21 @@
 package com.arangodb.reactive.entity.serde;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import java.nio.charset.StandardCharsets;
 
 /**
  * @author Michele Rastelli
  */
-public final class JsonSerde extends ArangoSerde {
+final class JsonSerde extends ArangoSerde {
 
-    public JsonSerde() {
-        super(new ObjectMapper());
+    JsonSerde() {
+        super(new JsonMapper());
+    }
+
+    JsonSerde(final ObjectMapper mapper) {
+        super(mapper);
     }
 
     @Override
