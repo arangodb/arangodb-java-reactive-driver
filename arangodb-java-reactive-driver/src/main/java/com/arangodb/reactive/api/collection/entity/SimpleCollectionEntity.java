@@ -21,6 +21,7 @@
 package com.arangodb.reactive.api.collection.entity;
 
 import com.arangodb.reactive.entity.GeneratePackagePrivateBuilder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
@@ -29,5 +30,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  */
 @GeneratePackagePrivateBuilder
 @JsonDeserialize(builder = SimpleCollectionEntityBuilder.class)
+@JsonIgnoreProperties({"code", "error", "id", "status"})
 public interface SimpleCollectionEntity extends CollectionEntity {
 }

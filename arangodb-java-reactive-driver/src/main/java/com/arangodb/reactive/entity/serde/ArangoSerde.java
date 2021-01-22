@@ -25,6 +25,8 @@ import com.arangodb.reactive.exceptions.SerdeException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Callable;
 
@@ -33,13 +35,16 @@ import java.util.concurrent.Callable;
  */
 public abstract class ArangoSerde {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArangoSerde.class);
+
     private final ObjectMapper mapper;
 
     protected ArangoSerde(final ObjectMapper objectMapper) {
+        // TODO: allow providing custom mapper (eg. configured with custom serde features) to be used for user classes only
         this.mapper = objectMapper;
-        // TODO: allow providing custom mapper (eg. configured with custom serde features)
-        // TODO: set (DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true) in tests
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        boolean failOnUnknownProperties = Boolean.parseBoolean(System.getProperty("test.serde.failOnUnknownProperties", "false"));
+        LOGGER.debug("DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES: {}", failOnUnknownProperties);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties);
         objectMapper.registerModule(ArangoDriverModule.INSTANCE.get());
     }
 

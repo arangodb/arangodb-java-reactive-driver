@@ -23,6 +23,7 @@ package com.arangodb.reactive.api.collection.entity;
 import com.arangodb.reactive.api.collection.options.KeyOptions;
 import com.arangodb.reactive.api.entity.ReplicationFactor;
 import com.arangodb.reactive.entity.GeneratePackagePrivateBuilder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -35,6 +36,7 @@ import java.util.List;
  */
 @GeneratePackagePrivateBuilder
 @JsonDeserialize(builder = DetailedCollectionEntityBuilder.class)
+@JsonIgnoreProperties({"code", "error", "id", "status", "statusString", "writeConcern"})
 public interface DetailedCollectionEntity extends CollectionEntity {
 
     /**
