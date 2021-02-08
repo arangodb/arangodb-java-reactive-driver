@@ -8,6 +8,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.TypeVariableName;
 import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.code.Type;
 import reactor.core.publisher.Flux;
@@ -151,6 +152,10 @@ public class GenerateSyncApiProcessor extends AbstractProcessor {
                         .collect(Collectors.toList()),
                 ", ");
 
+        List<TypeVariableName> typeVariableNames = symbol.getTypeParameters().stream()
+                .map(TypeVariableName::get)
+                .collect(Collectors.toList());
+
         TypeName syncReturnType = mapReturnType(symbol);
         String statement = "reactive().$L($L)";
         List<Object> statementArguments = new ArrayList<>();
@@ -186,6 +191,7 @@ public class GenerateSyncApiProcessor extends AbstractProcessor {
         statementArguments.add(delegationArguments);
 
         return specBuilder
+                .addTypeVariables(typeVariableNames)
                 .addStatement(statement, statementArguments.toArray())
                 .returns(syncReturnType)
                 .build();
@@ -210,6 +216,7 @@ public class GenerateSyncApiProcessor extends AbstractProcessor {
                             return MethodSpec
                                     .methodBuilder(m.name)
                                     .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                                    .addTypeVariables(m.typeVariables)
                                     .returns(m.returnType)
                                     .addParameters(parameters)
                                     .addJavadoc(

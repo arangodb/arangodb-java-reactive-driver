@@ -26,6 +26,9 @@ import com.arangodb.codegen.SyncApiDelegator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.Serializable;
+import java.util.Optional;
+
 /**
  * @author Michele Rastelli
  */
@@ -51,4 +54,7 @@ public interface TestApi {
     Mono<String> stringMethodWithStringArgument(String value);
 
     Flux<String> stringsCollectionMethodWithStringArgument(String a, String b, String c);
+
+    <T, U extends Serializable & Comparable<T>> Mono<Optional<U>> genericMethod(U value);
+
 }

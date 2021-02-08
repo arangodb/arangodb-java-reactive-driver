@@ -23,6 +23,9 @@ package api;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.Serializable;
+import java.util.Optional;
+
 /**
  * @author Michele Rastelli
  */
@@ -65,5 +68,9 @@ public class TestApiImpl implements TestApi {
         return Flux.just(a, b, c);
     }
 
+    @Override
+    public <T, U extends Serializable & Comparable<T>> Mono<Optional<U>> genericMethod(U value) {
+        return Mono.just(Optional.of(value));
+    }
 
 }
