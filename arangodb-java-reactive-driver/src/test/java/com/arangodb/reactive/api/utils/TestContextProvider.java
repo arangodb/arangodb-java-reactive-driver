@@ -83,6 +83,7 @@ public enum TestContextProvider implements Supplier<List<TestContext>> {
                     .flatMap(TestContext::createContexts)
                     .collect(Collectors.toList());
 
+            // FIXME: is this necessary? use the test suite database for this purpose
             // create user and userDB
             doForeachDeployment(arangoDB -> {
                         try {

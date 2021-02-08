@@ -24,6 +24,7 @@ package com.arangodb.reactive.api.collection.options;
 
 import com.arangodb.reactive.api.collection.entity.KeyType;
 import com.arangodb.reactive.entity.GenerateBuilder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -35,6 +36,7 @@ import javax.annotation.Nullable;
  */
 @GenerateBuilder
 @JsonDeserialize(builder = KeyOptionsBuilder.class)
+@JsonIgnoreProperties("lastValue")
 public interface KeyOptions {
 
     static KeyOptionsBuilder builder() {

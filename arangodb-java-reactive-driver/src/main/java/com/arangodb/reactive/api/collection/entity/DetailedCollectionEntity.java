@@ -36,7 +36,16 @@ import java.util.List;
  */
 @GeneratePackagePrivateBuilder
 @JsonDeserialize(builder = DetailedCollectionEntityBuilder.class)
-@JsonIgnoreProperties({"code", "error", "id", "status", "statusString", "writeConcern"})
+@JsonIgnoreProperties({
+        "code",
+        "error",
+        "id",
+        "status",
+        "statusString",
+        "writeConcern",
+        "tempObjectId",
+        "objectId"
+})
 public interface DetailedCollectionEntity extends CollectionEntity {
 
     /**

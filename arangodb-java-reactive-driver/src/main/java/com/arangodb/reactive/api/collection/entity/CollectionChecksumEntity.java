@@ -22,6 +22,7 @@ package com.arangodb.reactive.api.collection.entity;
 
 
 import com.arangodb.reactive.entity.GeneratePackagePrivateBuilder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
@@ -29,6 +30,16 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  */
 @GeneratePackagePrivateBuilder
 @JsonDeserialize(builder = CollectionChecksumEntityBuilder.class)
+@JsonIgnoreProperties({
+        "error",
+        "code",
+        "isSystem",
+        "type",
+        "globallyUniqueId",
+        "id",
+        "name",
+        "status"
+})
 public interface CollectionChecksumEntity {
 
     /**
