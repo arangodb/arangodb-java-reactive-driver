@@ -21,6 +21,7 @@
 package com.arangodb.reactive.communication;
 
 
+import com.arangodb.jackson.dataformat.velocypack.VPackMapper;
 import com.arangodb.reactive.connection.ArangoProtocol;
 import com.arangodb.reactive.connection.AuthenticationMethod;
 import com.arangodb.reactive.connection.ConnectionConfig;
@@ -28,11 +29,11 @@ import com.arangodb.reactive.connection.ContentType;
 import com.arangodb.reactive.connection.HostDescription;
 import com.arangodb.reactive.entity.GenerateBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.immutables.value.Value;
 
 import javax.annotation.Nullable;
 import java.time.Duration;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -82,10 +83,19 @@ public interface CommunicationConfig {
     }
 
     /**
-     * @return a custom mapper to use for user data serialization and deserialization. In case {@link #getContentType()}
-     * is {@code ContentType.VPACK}, then the mapper must be instance of {@code VPackMapper}
+     * @return a custom mapper to use for user data serialization and deserialization
      */
-    Optional<ObjectMapper> getMapper();
+    @Value.Default
+    default ObjectMapper getMapper() {
+        switch (getContentType()) {
+            case VPACK:
+                return new VPackMapper();
+            case JSON:
+                return new JsonMapper();
+            default:
+                throw new IllegalArgumentException(String.valueOf(getContentType()));
+        }
+    }
 
     /**
      * @return network protocol
@@ -163,6 +173,12 @@ public interface CommunicationConfig {
         if (getTimeout().compareTo(getAcquireHostListInterval()) >= 0) {
             throw new IllegalStateException("timeout must be less than acquireHostListInterval!");
         }
+
+        if ((ContentType.VPACK.equals(getContentType()) && !getMapper().getFactory().canHandleBinaryNatively()) ||
+                (ContentType.JSON.equals(getContentType()) && getMapper().getFactory().canHandleBinaryNatively())) {
+            throw new IllegalStateException("Invalid mapper for the specified content type!");
+        }
+
     }
 
 }

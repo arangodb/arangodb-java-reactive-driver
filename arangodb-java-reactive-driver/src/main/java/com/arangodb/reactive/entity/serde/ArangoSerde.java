@@ -26,6 +26,7 @@ import com.arangodb.reactive.exceptions.SerdeException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,6 @@ public abstract class ArangoSerde {
     private final ObjectMapper mapper;
 
     protected ArangoSerde(final ObjectMapper objectMapper) {
-        // TODO: allow providing custom mapper (eg. configured with custom serde features) to be used for user classes only
         this.mapper = objectMapper;
         boolean failOnUnknownProperties = Boolean.parseBoolean(System.getProperty("test.serde.failOnUnknownProperties", "false"));
         LOGGER.debug("DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES: {}", failOnUnknownProperties);
@@ -52,19 +52,22 @@ public abstract class ArangoSerde {
     public static ArangoSerde of(final ContentType contentType) {
         switch (contentType) {
             case VPACK:
-                return new VPackSerde();
+                return new VPackSerde(new VPackMapper());
             case JSON:
-                return new JsonSerde();
+                return new JsonSerde(new JsonMapper());
             default:
                 throw new IllegalArgumentException(String.valueOf(contentType));
         }
     }
 
-    public static ArangoSerde create(final ObjectMapper objectMapper) {
-        if (objectMapper instanceof VPackMapper) {
-            return new VPackSerde((VPackMapper) objectMapper);
-        } else {
-            return new JsonSerde(objectMapper);
+    public static ArangoSerde of(final ContentType contentType, final ObjectMapper objectMapper) {
+        switch (contentType) {
+            case VPACK:
+                return new VPackSerde(objectMapper);
+            case JSON:
+                return new JsonSerde(objectMapper);
+            default:
+                throw new IllegalArgumentException(String.valueOf(contentType));
         }
     }
 

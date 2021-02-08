@@ -21,7 +21,6 @@
 package com.arangodb.reactive.entity.serde;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import java.nio.charset.StandardCharsets;
 
@@ -29,10 +28,6 @@ import java.nio.charset.StandardCharsets;
  * @author Michele Rastelli
  */
 final class JsonSerde extends ArangoSerde {
-
-    JsonSerde() {
-        super(new JsonMapper());
-    }
 
     JsonSerde(final ObjectMapper mapper) {
         super(mapper);

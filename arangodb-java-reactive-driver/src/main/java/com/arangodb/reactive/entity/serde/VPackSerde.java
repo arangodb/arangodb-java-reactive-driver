@@ -20,19 +20,15 @@
 
 package com.arangodb.reactive.entity.serde;
 
-import com.arangodb.jackson.dataformat.velocypack.VPackMapper;
 import com.arangodb.velocypack.VPackSlice;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Michele Rastelli
  */
 final class VPackSerde extends ArangoSerde {
 
-    VPackSerde() {
-        super(new VPackMapper());
-    }
-
-    VPackSerde(final VPackMapper mapper) {
+    VPackSerde(final ObjectMapper mapper) {
         super(mapper);
     }
 

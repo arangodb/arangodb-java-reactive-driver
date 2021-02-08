@@ -47,7 +47,7 @@ public abstract class ArangoClientImpl implements ArangoClient {
     protected ArangoClientImpl(final CommunicationConfig config) {
         communication = ArangoCommunication.create(config).block();
         serde = ArangoSerde.of(config.getContentType());
-        userSerde = config.getMapper().map(ArangoSerde::create).orElse(serde);
+        userSerde = ArangoSerde.of(config.getContentType(), config.getMapper());
         conversationManager = new ConversationManagerImpl(communication);
     }
 
