@@ -89,6 +89,7 @@ public enum TestContextProvider implements Supplier<List<TestContext>> {
                         try {
                             arangoDB.db(TestContext.USER_DB).info();
                         } catch (ArangoException e) {
+                            // FIXME: create typed exception and catch here DatabaseNotFoundException only
                             arangoDB.createDatabase(DatabaseCreateOptions.builder()
                                     .name(TestContext.USER_DB)
                                     .addUsers(DatabaseCreateOptions.DatabaseUser.builder()

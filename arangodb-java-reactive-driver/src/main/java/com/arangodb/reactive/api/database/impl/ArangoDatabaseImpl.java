@@ -53,23 +53,19 @@ public final class ArangoDatabaseImpl extends ArangoClientImpl implements Arango
 
     private static final JavaType SIMPLE_COLLECTION_LIST = TypeFactory.defaultInstance().constructCollectionType(ArrayList.class, SimpleCollectionEntity.class);
 
-    private final ArangoDB arango;
     private final String name;
+
+    private final String adminDB;
 
     public ArangoDatabaseImpl(final ArangoDB arangoDB, final String dbName) {
         super((ArangoClientImpl) arangoDB);
-        arango = arangoDB;
-        this.name = dbName;
+        name = dbName;
+        adminDB = arangoDB.getAdminDB();
     }
 
     @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public ArangoDB arangoDB() {
-        return arango;
     }
 
     @Override
@@ -94,7 +90,7 @@ public final class ArangoDatabaseImpl extends ArangoClientImpl implements Arango
     public Mono<Void> drop() {
         return getCommunication().execute(
                 ArangoRequest.builder()
-                        .database(arango.getAdminDB())
+                        .database(adminDB)
                         .requestType(ArangoRequest.RequestType.DELETE)
                         .path(ApiPath.DATABASE + "/" + name)
                         .build()

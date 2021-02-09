@@ -54,7 +54,7 @@ jobs:
       - name: Configure reuse containers
         run: echo "testcontainers.reuse.enable=true" >> ~/.testcontainers.properties
       - name: Test
-        run: mvn -e --no-transfer-progress test -DexcludedGroups="resiliency" -Dtest.docker.image="${{matrix.docker-img}}" -Darango.license.key="$ARANGO_LICENSE_KEY" -Dtestcontainers.reuse.enable=true
+        run: mvn -e --no-transfer-progress test -DexcludedGroups="resiliency" -Dtest.docker.image="${{matrix.docker-img}}" -Darango.license.key="$ARANGO_LICENSE_KEY" -Dtestcontainers.reuse.enable=true -Dtest.serde.failOnUnknownProperties=true
         env:
           ARANGO_LICENSE_KEY: ${{secrets.ARANGO_LICENSE_KEY}}
       - name: Uploading containers logs

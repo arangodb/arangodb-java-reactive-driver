@@ -20,6 +20,7 @@
 
 package com.arangodb.reactive.api.utils;
 
+import com.arangodb.reactive.api.collection.options.CollectionCreateOptions;
 import com.arangodb.reactive.api.database.options.DatabaseCreateOptions;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -32,20 +33,25 @@ public class ArangoApiTestClassExtension implements BeforeAllCallback, AfterAllC
 
     @Override
     public void afterAll(ExtensionContext context) {
-        String dbName = context.getRequiredTestClass().getSimpleName();
+        String dbName = TestContext.getTestDbName(context);
         TestContextProvider.INSTANCE.doForeachDeployment(arangoDB -> arangoDB.db(dbName).drop());
     }
 
     @Override
     public void beforeAll(ExtensionContext context) {
-        String dbName = context.getRequiredTestClass().getSimpleName();
-        TestContextProvider.INSTANCE.doForeachDeployment(arangoDB -> arangoDB.createDatabase(
-                DatabaseCreateOptions.builder()
-                .name(dbName)
-                        .addUsers(DatabaseCreateOptions.DatabaseUser.builder()
-                                .username(TestContext.USER_NAME)
-                                .build())
-                        .build()));
+        String dbName = TestContext.getTestDbName(context);
+        String collectionName = TestContext.getTestCollectionName();
+        TestContextProvider.INSTANCE.doForeachDeployment(arangoDB -> {
+            arangoDB.createDatabase(
+                    DatabaseCreateOptions.builder()
+                            .name(dbName)
+                            .addUsers(DatabaseCreateOptions.DatabaseUser.builder()
+                                    .username(TestContext.USER_NAME)
+                                    .build())
+                            .build());
+            arangoDB.db(dbName).createCollection(CollectionCreateOptions.builder()
+                    .name(collectionName).build());
+        });
     }
 
 }

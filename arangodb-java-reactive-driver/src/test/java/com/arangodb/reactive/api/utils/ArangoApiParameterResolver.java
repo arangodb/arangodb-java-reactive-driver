@@ -22,8 +22,12 @@ package com.arangodb.reactive.api.utils;
 
 import com.arangodb.reactive.api.arangodb.ArangoDB;
 import com.arangodb.reactive.api.arangodb.ArangoDBSync;
+import com.arangodb.reactive.api.collection.ArangoCollection;
+import com.arangodb.reactive.api.collection.ArangoCollectionSync;
 import com.arangodb.reactive.api.database.ArangoDatabase;
 import com.arangodb.reactive.api.database.ArangoDatabaseSync;
+import com.arangodb.reactive.api.document.ArangoDocument;
+import com.arangodb.reactive.api.document.ArangoDocumentSync;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
@@ -57,18 +61,39 @@ public class ArangoApiParameterResolver implements ParameterResolver {
     }
 
     private Object resolve(Class<?> clazz, ExtensionContext extensionContext) {
-        final ArangoDatabase db = testClient.db(extensionContext.getRequiredTestClass().getSimpleName());
-        final ArangoDatabaseSync dbSync = testClient.sync().db(extensionContext.getRequiredTestClass().getSimpleName());
+        final String dbName = TestContext.getTestDbName(extensionContext);
+        final String collectionName = TestContext.getTestCollectionName();
+
+        final ArangoDB arangoDB = testClient;
+        final ArangoDBSync arangoDBSync = testClient.sync();
+
+        final ArangoDatabase db = arangoDB.db(dbName);
+        final ArangoDatabaseSync dbSync = arangoDBSync.db(dbName);
+
+        final ArangoCollection collection = db.collection(collectionName);
+        final ArangoCollectionSync collectionSync = dbSync.collection(collectionName);
+
+        final ArangoDocument document = collection.document();
+        final ArangoDocumentSync documentSync = collectionSync.document();
+
         if (clazz == TestContext.class) {
             return testContext;
         } else if (clazz == ArangoDB.class) {
-            return testClient;
+            return arangoDB;
         } else if (clazz == ArangoDBSync.class) {
-            return testClient.sync();
+            return arangoDBSync;
         } else if (clazz == ArangoDatabase.class) {
             return db;
         } else if (clazz == ArangoDatabaseSync.class) {
             return dbSync;
+        } else if (clazz == ArangoCollection.class) {
+            return collection;
+        } else if (clazz == ArangoCollectionSync.class) {
+            return collectionSync;
+        } else if (clazz == ArangoDocument.class) {
+            return document;
+        } else if (clazz == ArangoDocumentSync.class) {
+            return documentSync;
         } else {
             return null;
         }

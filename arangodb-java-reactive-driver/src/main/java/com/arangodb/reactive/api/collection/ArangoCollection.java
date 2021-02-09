@@ -22,6 +22,7 @@ package com.arangodb.reactive.api.collection;
 
 
 import com.arangodb.codegen.GenerateSyncApi;
+import com.arangodb.codegen.SyncApiDelegator;
 import com.arangodb.reactive.api.collection.entity.CollectionChecksumEntity;
 import com.arangodb.reactive.api.collection.entity.DetailedCollectionEntity;
 import com.arangodb.reactive.api.collection.entity.SimpleCollectionEntity;
@@ -29,6 +30,7 @@ import com.arangodb.reactive.api.collection.options.CollectionChangePropertiesOp
 import com.arangodb.reactive.api.collection.options.CollectionChecksumParams;
 import com.arangodb.reactive.api.collection.options.CollectionDropParams;
 import com.arangodb.reactive.api.collection.options.CollectionRenameOptions;
+import com.arangodb.reactive.api.document.ArangoDocument;
 import com.arangodb.reactive.api.reactive.ArangoClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -45,6 +47,12 @@ public interface ArangoCollection extends ArangoClient {
      * @return collection name
      */
     String getName();
+
+    /**
+     * @return DocumentApi for the current collection
+     */
+    @SyncApiDelegator
+    ArangoDocument document();
 
     /**
      * Deletes the collection from the database.

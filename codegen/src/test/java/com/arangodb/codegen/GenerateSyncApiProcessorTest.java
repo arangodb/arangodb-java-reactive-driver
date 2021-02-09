@@ -88,7 +88,7 @@ class GenerateSyncApiProcessorTest {
         );
     }
 
-//    @AfterAll
+    @AfterAll
     static void cleanup() throws IOException {
         // clean generated directory
         FileUtils.deleteDirectory(new File(GENERATED_DIR));

@@ -30,6 +30,8 @@ import com.arangodb.reactive.api.collection.options.CollectionChecksumParams;
 import com.arangodb.reactive.api.collection.options.CollectionDropParams;
 import com.arangodb.reactive.api.collection.options.CollectionRenameOptions;
 import com.arangodb.reactive.api.database.ArangoDatabase;
+import com.arangodb.reactive.api.document.ArangoDocument;
+import com.arangodb.reactive.api.document.impl.ArangoDocumentImpl;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
 import com.arangodb.reactive.api.util.ApiPath;
 import com.arangodb.reactive.connection.ArangoRequest;
@@ -60,6 +62,11 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     @Override
     public String getName() {
         return colName;
+    }
+
+    @Override
+    public ArangoDocument document() {
+        return new ArangoDocumentImpl(dbName, this);
     }
 
     @Override

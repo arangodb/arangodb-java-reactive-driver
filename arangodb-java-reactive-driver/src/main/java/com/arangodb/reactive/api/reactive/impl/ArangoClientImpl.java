@@ -64,4 +64,8 @@ public abstract class ArangoClientImpl implements ArangoClient {
         return serde;
     }
 
+    protected final ArangoSerde getUserSerde() {
+        return userSerde;
+    }
+
 }

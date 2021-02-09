@@ -174,8 +174,8 @@ public interface CommunicationConfig {
             throw new IllegalStateException("timeout must be less than acquireHostListInterval!");
         }
 
-        if ((ContentType.VPACK.equals(getContentType()) && !getMapper().getFactory().canHandleBinaryNatively()) ||
-                (ContentType.JSON.equals(getContentType()) && getMapper().getFactory().canHandleBinaryNatively())) {
+        if (ContentType.VPACK.equals(getContentType()) && !getMapper().getFactory().canHandleBinaryNatively()
+                || ContentType.JSON.equals(getContentType()) && getMapper().getFactory().canHandleBinaryNatively()) {
             throw new IllegalStateException("Invalid mapper for the specified content type!");
         }
 

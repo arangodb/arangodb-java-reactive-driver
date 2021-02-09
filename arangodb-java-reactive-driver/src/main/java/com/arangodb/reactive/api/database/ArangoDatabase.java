@@ -23,7 +23,6 @@ package com.arangodb.reactive.api.database;
 
 import com.arangodb.codegen.GenerateSyncApi;
 import com.arangodb.codegen.SyncApiDelegator;
-import com.arangodb.reactive.api.arangodb.ArangoDB;
 import com.arangodb.reactive.api.collection.ArangoCollection;
 import com.arangodb.reactive.api.collection.entity.DetailedCollectionEntity;
 import com.arangodb.reactive.api.collection.entity.SimpleCollectionEntity;
@@ -45,12 +44,6 @@ public interface ArangoDatabase extends ArangoClient {
      * @return database name
      */
     String getName();
-
-    /**
-     * @return main entry point for the ArangoDB driver
-     */
-    @SyncApiDelegator
-    ArangoDB arangoDB();
 
     /**
      * @param collectionName Name of the collection

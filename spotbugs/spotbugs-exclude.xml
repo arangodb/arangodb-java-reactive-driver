@@ -22,6 +22,10 @@
     </Match>
 
     <Match>
+        <Class name="~.*SyncImpl"/>
+    </Match>
+
+    <Match>
         <!-- till https://github.com/spotbugs/spotbugs/issues/259 -->
         <Class name="~.*"/>
         <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE"/>

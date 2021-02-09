@@ -25,6 +25,7 @@ import com.arangodb.reactive.connection.ContentType;
 import com.arangodb.reactive.exceptions.SerdeException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
@@ -94,8 +95,13 @@ public abstract class ArangoSerde {
     }
 
     public final <T> T deserializeAtJsonPointer(final String jsonPointer, final byte[] buffer, final JavaType clazz) {
-        return wrapSerdeException(() ->
-                mapper.readerFor(clazz).at(jsonPointer).readValue(buffer)
+        return wrapSerdeException(() -> {
+                    JsonNode target = mapper.readTree(buffer).at(jsonPointer);
+                    if (target.isMissingNode()) {
+                        return null;
+                    }
+                    return mapper.readerFor(clazz).readValue(target);
+                }
         );
     }
 

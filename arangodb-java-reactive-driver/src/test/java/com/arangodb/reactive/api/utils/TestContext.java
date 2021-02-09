@@ -30,6 +30,7 @@ import com.arangodb.reactive.connection.ConnectionConfig;
 import com.arangodb.reactive.connection.ContentType;
 import deployments.ContainerDeployment;
 import org.assertj.core.data.MapEntry;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import utils.TestUtils;
 
 import java.time.Duration;
@@ -49,6 +50,14 @@ public class TestContext {
 
     private final ContainerDeployment deployment;
     private final ArangoConfig config;
+
+    public static String getTestDbName(ExtensionContext extensionContext) {
+        return extensionContext.getRequiredTestClass().getSimpleName();
+    }
+
+    public static String getTestCollectionName() {
+        return "testCollection";
+    }
 
     public static Stream<TestContext> createContexts(final ContainerDeployment deployment) {
         List<Map.Entry<ArangoProtocol, ContentType>> contexts = new ArrayList<>();

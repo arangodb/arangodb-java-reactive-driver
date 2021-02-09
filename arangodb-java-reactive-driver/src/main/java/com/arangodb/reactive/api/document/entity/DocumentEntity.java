@@ -18,16 +18,33 @@
  * Copyright holder is ArangoDB GmbH, Cologne, Germany
  */
 
-package com.arangodb.reactive.api.util;
+
+package com.arangodb.reactive.api.document.entity;
+
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Michele Rastelli
  */
-public final class ApiPath {
-    public static final String DATABASE = "/_api/database";
-    public static final String COLLECTION = "/_api/collection";
-    public static final String DOCUMENT = "/_api/document";
+public interface DocumentEntity {
 
-    private ApiPath() {
-    }
+    /**
+     * @return the document identifier
+     */
+    @JsonProperty("_id")
+    String getId();
+
+    /**
+     * @return the document key
+     */
+    @JsonProperty("_key")
+    String getKey();
+
+    /**
+     * @return the document revision
+     */
+    @JsonProperty("_rev")
+    String getRev();
+
 }
