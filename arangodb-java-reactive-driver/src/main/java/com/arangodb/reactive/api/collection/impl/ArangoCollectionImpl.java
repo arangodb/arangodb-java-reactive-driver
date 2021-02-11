@@ -50,12 +50,12 @@ import static com.arangodb.reactive.entity.serde.SerdeTypes.STRING_OBJECT_MAP;
  */
 public final class ArangoCollectionImpl extends ArangoClientImpl implements ArangoCollection {
 
-    private final String dbName;
+    private final ArangoDatabase database;
     private final String colName;
 
     public ArangoCollectionImpl(final ArangoDatabase arangoDatabase, final String collectionName) {
         super((ArangoClientImpl) arangoDatabase);
-        dbName = arangoDatabase.getName();
+        database = arangoDatabase;
         colName = collectionName;
     }
 
@@ -65,8 +65,13 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     }
 
     @Override
+    public ArangoDatabase database() {
+        return database;
+    }
+
+    @Override
     public ArangoDocument document() {
-        return new ArangoDocumentImpl(dbName, this);
+        return new ArangoDocumentImpl(this);
     }
 
     @Override
@@ -79,7 +84,7 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
         return getCommunication()
                 .execute(
                         ArangoRequest.builder()
-                                .database(dbName)
+                                .database(database().getName())
                                 .requestType(ArangoRequest.RequestType.DELETE)
                                 .path(ApiPath.COLLECTION + "/" + colName)
                                 .putQueryParams(
@@ -95,7 +100,7 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     public Mono<SimpleCollectionEntity> info() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
-                        .database(dbName)
+                        .database(database().getName())
                         .requestType(ArangoRequest.RequestType.GET)
                         .path(ApiPath.COLLECTION + "/" + colName)
                         .build())
@@ -107,7 +112,7 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     public Mono<DetailedCollectionEntity> properties() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
-                        .database(dbName)
+                        .database(database().getName())
                         .requestType(ArangoRequest.RequestType.GET)
                         .path(ApiPath.COLLECTION + "/" + colName + "/properties")
                         .build())
@@ -119,7 +124,7 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     public Mono<DetailedCollectionEntity> changeProperties(final CollectionChangePropertiesOptions options) {
         return getCommunication()
                 .execute(ArangoRequest.builder()
-                        .database(dbName)
+                        .database(database().getName())
                         .requestType(ArangoRequest.RequestType.PUT)
                         .path(ApiPath.COLLECTION + "/" + colName + "/properties")
                         .body(getSerde().serialize(options))
@@ -132,7 +137,7 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     public Mono<SimpleCollectionEntity> rename(final CollectionRenameOptions options) {
         return getCommunication()
                 .execute(ArangoRequest.builder()
-                        .database(dbName)
+                        .database(database().getName())
                         .requestType(ArangoRequest.RequestType.PUT)
                         .path(ApiPath.COLLECTION + "/" + colName + "/rename")
                         .body(getSerde().serialize(options))
@@ -146,7 +151,7 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     public Mono<Long> count() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
-                        .database(dbName)
+                        .database(database().getName())
                         .requestType(ArangoRequest.RequestType.GET)
                         .path(ApiPath.COLLECTION + "/" + colName + "/count")
                         .build())
@@ -163,7 +168,7 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     public Mono<CollectionChecksumEntity> checksum(final CollectionChecksumParams params) {
         return getCommunication()
                 .execute(ArangoRequest.builder()
-                        .database(dbName)
+                        .database(database().getName())
                         .requestType(ArangoRequest.RequestType.GET)
                         .path(ApiPath.COLLECTION + "/" + colName + "/checksum")
                         .putQueryParams(
@@ -183,7 +188,7 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     public Mono<Map<String, Object>> statistics() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
-                        .database(dbName)
+                        .database(database().getName())
                         .requestType(ArangoRequest.RequestType.GET)
                         .path(ApiPath.COLLECTION + "/" + colName + "/figures")
                         .build())
@@ -195,7 +200,7 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     public Mono<Void> load() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
-                        .database(dbName)
+                        .database(database().getName())
                         .requestType(ArangoRequest.RequestType.PUT)
                         .path(ApiPath.COLLECTION + "/" + colName + "/load")
                         .build())
@@ -206,7 +211,7 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     public Mono<Void> loadIndexes() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
-                        .database(dbName)
+                        .database(database().getName())
                         .requestType(ArangoRequest.RequestType.PUT)
                         .path(ApiPath.COLLECTION + "/" + colName + "/loadIndexesIntoMemory")
                         .build())
@@ -217,7 +222,7 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     public Mono<Void> recalculateCount() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
-                        .database(dbName)
+                        .database(database().getName())
                         .requestType(ArangoRequest.RequestType.PUT)
                         .path(ApiPath.COLLECTION + "/" + colName + "/recalculateCount")
                         .build())
@@ -228,7 +233,7 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     public Mono<Void> truncate() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
-                        .database(dbName)
+                        .database(database().getName())
                         .requestType(ArangoRequest.RequestType.PUT)
                         .path(ApiPath.COLLECTION + "/" + colName + "/truncate")
                         .build())
@@ -239,7 +244,7 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     public Mono<String> responsibleShard(final Object document) {
         return getCommunication()
                 .execute(ArangoRequest.builder()
-                        .database(dbName)
+                        .database(database().getName())
                         .requestType(ArangoRequest.RequestType.PUT)
                         .path(ApiPath.COLLECTION + "/" + colName + "/responsibleShard")
                         .body(getSerde().serialize(document))
@@ -252,7 +257,7 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     public Mono<String> revision() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
-                        .database(dbName)
+                        .database(database().getName())
                         .requestType(ArangoRequest.RequestType.GET)
                         .path(ApiPath.COLLECTION + "/" + colName + "/revision")
                         .build())
@@ -264,7 +269,7 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     public Flux<String> shards() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
-                        .database(dbName)
+                        .database(database().getName())
                         .requestType(ArangoRequest.RequestType.GET)
                         .path(ApiPath.COLLECTION + "/" + colName + "/shards")
                         .build())
@@ -277,7 +282,7 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     public Mono<Void> unload() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
-                        .database(dbName)
+                        .database(database().getName())
                         .requestType(ArangoRequest.RequestType.PUT)
                         .path(ApiPath.COLLECTION + "/" + colName + "/unload")
                         .build())

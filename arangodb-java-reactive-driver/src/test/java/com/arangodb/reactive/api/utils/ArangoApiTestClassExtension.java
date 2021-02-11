@@ -38,7 +38,7 @@ public class ArangoApiTestClassExtension implements BeforeAllCallback, AfterAllC
     }
 
     @Override
-    public void beforeAll(ExtensionContext context) {
+    public void beforeAll(ExtensionContext context) throws InterruptedException {
         String dbName = TestContext.getTestDbName(context);
         String collectionName = TestContext.getTestCollectionName();
         TestContextProvider.INSTANCE.doForeachDeployment(arangoDB -> {
@@ -52,6 +52,9 @@ public class ArangoApiTestClassExtension implements BeforeAllCallback, AfterAllC
             arangoDB.db(dbName).createCollection(CollectionCreateOptions.builder()
                     .name(collectionName).build());
         });
+
+        // createDatabase with users is not atomic and eventual consistent
+        Thread.sleep(1_000);
     }
 
 }

@@ -24,6 +24,7 @@ package com.arangodb.reactive.api.document.impl;
 import com.arangodb.reactive.api.collection.ArangoCollection;
 import com.arangodb.reactive.api.document.ArangoDocument;
 import com.arangodb.reactive.api.document.entity.DocumentCreateEntity;
+import com.arangodb.reactive.api.document.options.DocumentCreateOptions;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
 import com.arangodb.reactive.api.util.ApiPath;
 import com.arangodb.reactive.connection.ArangoRequest;
@@ -35,23 +36,31 @@ import reactor.core.publisher.Mono;
  */
 public final class ArangoDocumentImpl extends ArangoClientImpl implements ArangoDocument {
 
-    private final String dbName;
-    private final String colName;
+    private static final String RETURN_NEW = "returnNew";
+    private static final String RETURN_OLD = "returnOld";
 
-    public ArangoDocumentImpl(final String databaseName, final ArangoCollection arangoCollection) {
+    private final ArangoCollection collection;
+
+    public ArangoDocumentImpl(final ArangoCollection arangoCollection) {
         super((ArangoClientImpl) arangoCollection);
-        dbName = databaseName;
-        colName = arangoCollection.getName();
+        collection = arangoCollection;
     }
 
     @Override
-    public <T> Mono<DocumentCreateEntity<T>> createDocument(final T value) {
+    public ArangoCollection collection() {
+        return collection;
+    }
+
+    @Override
+    public <T> Mono<DocumentCreateEntity<T>> createDocument(final T value, final DocumentCreateOptions options) {
         return getCommunication()
                 .execute(
                         ArangoRequest.builder()
-                                .database(dbName)
+                                .database(collection.database().getName())
                                 .requestType(ArangoRequest.RequestType.POST)
-                                .path(ApiPath.DOCUMENT + "/" + colName)
+                                .path(ApiPath.DOCUMENT + "/" + collection.getName())
+                                .putQueryParams(RETURN_NEW, options.getReturnNew().map(Object::toString))
+                                .putQueryParams(RETURN_OLD, options.getReturnOld().map(Object::toString))
                                 .body(getUserSerde().serialize(value))
                                 .build()
                 )

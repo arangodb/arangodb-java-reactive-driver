@@ -23,6 +23,7 @@ package com.arangodb.reactive.api.document.entity;
 
 import com.arangodb.reactive.entity.GenerateBuilder;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import javax.annotation.Nullable;
@@ -32,6 +33,7 @@ import javax.annotation.Nullable;
  */
 @GenerateBuilder
 @JsonDeserialize(builder = DocumentCreateEntityBuilder.class)
+@JsonIgnoreProperties({"new", "old"})
 public interface DocumentCreateEntity<T> extends DocumentEntity {
 
     static <T> DocumentCreateEntityBuilder<T> builder() {

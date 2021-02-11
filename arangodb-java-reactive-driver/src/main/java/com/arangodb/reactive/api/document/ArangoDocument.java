@@ -22,7 +22,10 @@ package com.arangodb.reactive.api.document;
 
 
 import com.arangodb.codegen.GenerateSyncApi;
+import com.arangodb.codegen.SyncApiDelegator;
+import com.arangodb.reactive.api.collection.ArangoCollection;
 import com.arangodb.reactive.api.document.entity.DocumentCreateEntity;
+import com.arangodb.reactive.api.document.options.DocumentCreateOptions;
 import com.arangodb.reactive.api.reactive.ArangoClient;
 import reactor.core.publisher.Mono;
 
@@ -33,16 +36,27 @@ import reactor.core.publisher.Mono;
 public interface ArangoDocument extends ArangoClient {
 
     /**
+     * @return DocumentApi for the current collection
+     */
+    @SyncApiDelegator
+    ArangoCollection collection();
+
+    /**
      * Creates a new document from the given document, unless there is already a document with the _key given. If no
      * _key is given, a new unique _key is generated automatically.
      * <p>
      * // TODO: define which types of raw data we want to let pass through (eg. VPackSlice/byte[]/String/JsonNode/ObjectNode/...)
      *
-     * @param value A representation of a single document (POJO, ... )
+     * @param value   A representation of a single document (POJO, ... )
+     * @param options Additional options
      * @return information about the document
      * @see <a href="https://www.arangodb.com/docs/stable/http/document-working-with-documents.html#create-document">API
      * Documentation</a>
      */
-    <T> Mono<DocumentCreateEntity<T>> createDocument(T value);
+    <T> Mono<DocumentCreateEntity<T>> createDocument(T value, DocumentCreateOptions options);
+
+    default <T> Mono<DocumentCreateEntity<T>> createDocument(T value) {
+        return createDocument(value, DocumentCreateOptions.builder().build());
+    }
 
 }

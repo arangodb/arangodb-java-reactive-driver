@@ -30,6 +30,7 @@ import com.arangodb.reactive.api.collection.options.CollectionChangePropertiesOp
 import com.arangodb.reactive.api.collection.options.CollectionChecksumParams;
 import com.arangodb.reactive.api.collection.options.CollectionDropParams;
 import com.arangodb.reactive.api.collection.options.CollectionRenameOptions;
+import com.arangodb.reactive.api.database.ArangoDatabase;
 import com.arangodb.reactive.api.document.ArangoDocument;
 import com.arangodb.reactive.api.reactive.ArangoClient;
 import reactor.core.publisher.Flux;
@@ -47,6 +48,12 @@ public interface ArangoCollection extends ArangoClient {
      * @return collection name
      */
     String getName();
+
+    /**
+     * @return ArangoDatabase for the current collection
+     */
+    @SyncApiDelegator
+    ArangoDatabase database();
 
     /**
      * @return DocumentApi for the current collection

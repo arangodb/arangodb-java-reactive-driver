@@ -22,11 +22,16 @@ package com.arangodb.reactive.api.document;
 
 
 import com.arangodb.reactive.api.document.entity.DocumentCreateEntity;
+import com.arangodb.reactive.api.document.options.DocumentCreateOptions;
 import com.arangodb.reactive.api.utils.ArangoApiTest;
 import com.arangodb.reactive.api.utils.ArangoApiTestClass;
+import com.arangodb.reactive.entity.serde.Id;
+import com.arangodb.reactive.entity.serde.Key;
+import com.arangodb.reactive.entity.serde.Rev;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,6 +49,40 @@ public class ArangoDocumentTest {
         assertThat(created.getRev()).isNotNull();
         assertThat(created.getNew()).isNull();
         assertThat(created.getOld()).isNull();
+    }
+
+    @ArangoApiTest
+    void createDocumentFromUserClass(ArangoDocumentSync documentApi) {
+        MyDoc doc = new MyDoc();
+        doc.key = "key-" + UUID.randomUUID().toString();
+        DocumentCreateEntity<MyDoc> created = documentApi.createDocument(doc,
+                DocumentCreateOptions.builder()
+                        .returnNew(true)
+                        .build());
+        assertThat(created.getId()).isEqualTo(documentApi.collection().getName() + "/" + doc.key);
+        assertThat(created.getKey()).isEqualTo(doc.key);
+        assertThat(created.getRev()).isNotNull();
+        assertThat(created.getNew()).isNotNull();
+        MyDoc createdDoc = created.getNew();
+        assertThat(createdDoc.key).isEqualTo(created.getKey());
+        assertThat(createdDoc.id).isEqualTo(created.getId());
+        assertThat(createdDoc.rev).isEqualTo(created.getRev());
+        assertThat(created.getOld()).isNull();
+    }
+
+
+    static class MyDoc {
+        @Key
+        String key;
+
+        @Id
+        String id;
+
+        @Rev
+        String rev;
+
+        MyDoc() {
+        }
     }
 
 }

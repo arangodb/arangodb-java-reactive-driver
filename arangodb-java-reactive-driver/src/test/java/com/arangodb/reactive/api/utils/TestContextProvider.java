@@ -99,11 +99,14 @@ public enum TestContextProvider implements Supplier<List<TestContext>> {
                                     .build());
                         }
                     }
-
             );
 
             long end = new Date().getTime();
             log.info("TestContextProvider initialized in [ms]: {}", end - start);
+
+            // createDatabase with users is not atomic and eventual consistent
+            Thread.sleep(1_000);
+
         } catch (Exception e) {
             log.error("Exception in TestUtils initializer", e);
             System.exit(1);
