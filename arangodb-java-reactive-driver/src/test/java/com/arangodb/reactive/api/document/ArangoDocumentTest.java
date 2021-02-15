@@ -22,6 +22,7 @@ package com.arangodb.reactive.api.document;
 
 
 import com.arangodb.reactive.api.document.entity.DocumentCreateEntity;
+import com.arangodb.reactive.api.document.entity.OverwriteMode;
 import com.arangodb.reactive.api.document.options.DocumentCreateOptions;
 import com.arangodb.reactive.api.utils.ArangoApiTest;
 import com.arangodb.reactive.api.utils.ArangoApiTestClass;
@@ -30,6 +31,7 @@ import com.arangodb.reactive.entity.serde.Key;
 import com.arangodb.reactive.entity.serde.Rev;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -43,43 +45,158 @@ public class ArangoDocumentTest {
 
     @ArangoApiTest
     void createDocument(ArangoDocumentSync documentApi) {
-        DocumentCreateEntity<Map<String, String>> created = documentApi.createDocument(Collections.singletonMap("name", "test"));
-        assertThat(created.getId()).isNotNull();
-        assertThat(created.getKey()).isNotNull();
-        assertThat(created.getRev()).isNotNull();
-        assertThat(created.getNew()).isNull();
-        assertThat(created.getOld()).isNull();
-    }
-
-    @ArangoApiTest
-    void createDocumentFromUserClass(ArangoDocumentSync documentApi) {
         MyDoc doc = new MyDoc();
         doc.key = "key-" + UUID.randomUUID().toString();
+        doc.data = Collections.singletonMap("key", "value");
+
         DocumentCreateEntity<MyDoc> created = documentApi.createDocument(doc,
                 DocumentCreateOptions.builder()
                         .returnNew(true)
                         .build());
+
         assertThat(created.getId()).isEqualTo(documentApi.collection().getName() + "/" + doc.key);
         assertThat(created.getKey()).isEqualTo(doc.key);
         assertThat(created.getRev()).isNotNull();
+        assertThat(created.getOldRev()).isNull();
         assertThat(created.getNew()).isNotNull();
+        assertThat(created.getOld()).isNull();
+
         MyDoc createdDoc = created.getNew();
+
         assertThat(createdDoc.key).isEqualTo(created.getKey());
         assertThat(createdDoc.id).isEqualTo(created.getId());
         assertThat(createdDoc.rev).isEqualTo(created.getRev());
-        assertThat(created.getOld()).isNull();
+        assertThat(createdDoc.data).isEqualTo(doc.data);
     }
 
+    @ArangoApiTest
+    void createDocumentOverwriteUpdate(ArangoDocumentSync documentApi) {
+        MyDoc docA = new MyDoc();
+        docA.key = "key-" + UUID.randomUUID().toString();
+        docA.data = Map.of(
+                "k1", "v1A",
+                "k2", "v2A",
+                "k3", "v3A"
+        );
+        DocumentCreateEntity<MyDoc> created = documentApi.createDocument(docA);
+
+        MyDoc docB = new MyDoc();
+        docB.key = docA.key;
+        docB.data = new HashMap<>();
+        docB.data.put("k1", "v1B");
+        docB.data.put("k3", null);
+        docB.data.put("k4", "v4B");
+        DocumentCreateEntity<MyDoc> updated = documentApi.createDocument(docB,
+                DocumentCreateOptions.builder()
+                        .waitForSync(true)
+                        .returnNew(true)
+                        .returnOld(true)
+                        .overwriteMode(OverwriteMode.UPDATE)
+                        .keepNull(false)
+                        .mergeObjects(true)
+                        .build());
+
+        assertThat(updated.getId()).isEqualTo(documentApi.collection().getName() + "/" + docB.key);
+        assertThat(updated.getKey()).isEqualTo(docB.key);
+        assertThat(updated.getRev()).isNotNull();
+        assertThat(updated.getOldRev()).isEqualTo(created.getRev());
+        assertThat(updated.getNew()).isNotNull();
+        assertThat(updated.getOld()).isNotNull();
+
+        MyDoc oldDoc = updated.getOld();
+        assertThat(oldDoc.key).isEqualTo(created.getKey());
+        assertThat(oldDoc.id).isEqualTo(created.getId());
+        assertThat(oldDoc.rev).isEqualTo(created.getRev());
+        assertThat(oldDoc.data).isEqualTo(docA.data);
+
+        MyDoc updatedDoc = updated.getNew();
+
+        assertThat(updatedDoc.key).isEqualTo(updated.getKey());
+        assertThat(updatedDoc.id).isEqualTo(updated.getId());
+        assertThat(updatedDoc.rev).isEqualTo(updated.getRev());
+        assertThat(updatedDoc.data).isEqualTo(Map.of(
+                "k1", "v1B",
+                "k2", "v2A",
+                "k4", "v4B"
+        ));
+    }
+
+    @ArangoApiTest
+    void createDocumentOverwriteReplace(ArangoDocumentSync documentApi) {
+        MyDoc docA = new MyDoc();
+        docA.key = "key-" + UUID.randomUUID().toString();
+        docA.data = Map.of("k1", "v1A");
+        DocumentCreateEntity<MyDoc> created = documentApi.createDocument(docA);
+
+        MyDoc docB = new MyDoc();
+        docB.key = docA.key;
+        docB.data = Map.of("k1", "v1B");
+        DocumentCreateEntity<MyDoc> updated = documentApi.createDocument(docB,
+                DocumentCreateOptions.builder()
+                        .waitForSync(true)
+                        .returnNew(true)
+                        .returnOld(true)
+                        .overwriteMode(OverwriteMode.REPLACE)
+                        .build());
+
+        assertThat(updated.getId()).isEqualTo(documentApi.collection().getName() + "/" + docB.key);
+        assertThat(updated.getKey()).isEqualTo(docB.key);
+        assertThat(updated.getRev()).isNotNull();
+        assertThat(updated.getOldRev()).isEqualTo(created.getRev());
+        assertThat(updated.getNew()).isNotNull();
+        assertThat(updated.getOld()).isNotNull();
+
+        MyDoc oldDoc = updated.getOld();
+        assertThat(oldDoc.key).isEqualTo(created.getKey());
+        assertThat(oldDoc.id).isEqualTo(created.getId());
+        assertThat(oldDoc.rev).isEqualTo(created.getRev());
+        assertThat(oldDoc.data).isEqualTo(docA.data);
+
+        MyDoc updatedDoc = updated.getNew();
+
+        assertThat(updatedDoc.key).isEqualTo(updated.getKey());
+        assertThat(updatedDoc.id).isEqualTo(updated.getId());
+        assertThat(updatedDoc.rev).isEqualTo(updated.getRev());
+        assertThat(updatedDoc.data).isEqualTo(docB.data);
+    }
+
+    @ArangoApiTest
+    void createDocumentOverwriteIgnore(ArangoDocumentSync documentApi) {
+        MyDoc docA = new MyDoc();
+        docA.key = "key-" + UUID.randomUUID().toString();
+        docA.data = Map.of("k1", "v1A");
+        DocumentCreateEntity<MyDoc> created = documentApi.createDocument(docA);
+
+        MyDoc docB = new MyDoc();
+        docB.key = docA.key;
+        docB.data = Map.of("k1", "v1B");
+        DocumentCreateEntity<MyDoc> updated = documentApi.createDocument(docB,
+                DocumentCreateOptions.builder()
+                        .waitForSync(true)
+                        .returnNew(true)
+                        .returnOld(true)
+                        .overwriteMode(OverwriteMode.IGNORE)
+                        .build());
+
+        assertThat(updated.getId()).isEqualTo(documentApi.collection().getName() + "/" + docB.key);
+        assertThat(updated.getKey()).isEqualTo(docB.key);
+        assertThat(updated.getRev()).isNotNull();
+        assertThat(updated.getOldRev()).isNull();
+        assertThat(updated.getNew()).isNull();
+        assertThat(updated.getOld()).isNull();
+    }
 
     static class MyDoc {
         @Key
-        String key;
+        public String key;
 
         @Id
-        String id;
+        public String id;
 
         @Rev
-        String rev;
+        public String rev;
+
+        public Map<String, Object> data;
 
         MyDoc() {
         }

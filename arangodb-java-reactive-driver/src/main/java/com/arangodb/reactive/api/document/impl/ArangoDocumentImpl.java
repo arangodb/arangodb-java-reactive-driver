@@ -24,6 +24,7 @@ package com.arangodb.reactive.api.document.impl;
 import com.arangodb.reactive.api.collection.ArangoCollection;
 import com.arangodb.reactive.api.document.ArangoDocument;
 import com.arangodb.reactive.api.document.entity.DocumentCreateEntity;
+import com.arangodb.reactive.api.document.entity.OverwriteMode;
 import com.arangodb.reactive.api.document.options.DocumentCreateOptions;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
 import com.arangodb.reactive.api.util.ApiPath;
@@ -36,8 +37,13 @@ import reactor.core.publisher.Mono;
  */
 public final class ArangoDocumentImpl extends ArangoClientImpl implements ArangoDocument {
 
+    private static final String WAIT_FOR_SYNC = "waitForSync";
     private static final String RETURN_NEW = "returnNew";
     private static final String RETURN_OLD = "returnOld";
+    private static final String OVERWRITE = "overwrite";
+    private static final String OVERWRITE_MODE = "overwriteMode";
+    private static final String KEEP_NULL = "keepNull";
+    private static final String MERGE_OBJECTS = "mergeObjects";
 
     private final ArangoCollection collection;
 
@@ -59,8 +65,13 @@ public final class ArangoDocumentImpl extends ArangoClientImpl implements Arango
                                 .database(collection.database().getName())
                                 .requestType(ArangoRequest.RequestType.POST)
                                 .path(ApiPath.DOCUMENT + "/" + collection.getName())
+                                .putQueryParams(WAIT_FOR_SYNC, options.getWaitForSync().map(Object::toString))
                                 .putQueryParams(RETURN_NEW, options.getReturnNew().map(Object::toString))
                                 .putQueryParams(RETURN_OLD, options.getReturnOld().map(Object::toString))
+                                .putQueryParams(OVERWRITE, options.getOverwrite().map(Object::toString))
+                                .putQueryParams(OVERWRITE_MODE, options.getOverwriteMode().map(OverwriteMode::getValue))
+                                .putQueryParams(KEEP_NULL, options.getKeepNull().map(Object::toString))
+                                .putQueryParams(MERGE_OBJECTS, options.getMergeObjects().map(Object::toString))
                                 .body(getUserSerde().serialize(value))
                                 .build()
                 )

@@ -21,6 +21,7 @@
 package com.arangodb.reactive.api.document.options;
 
 
+import com.arangodb.reactive.api.document.entity.OverwriteMode;
 import com.arangodb.reactive.entity.GenerateBuilder;
 
 import java.util.Optional;
@@ -38,6 +39,11 @@ public interface DocumentCreateOptions {
     }
 
     /**
+     * @return Wait until document has been synced to disk.
+     */
+    Optional<Boolean> getWaitForSync();
+
+    /**
      * @return Return additionally the complete new document under the attribute new in the result.
      */
     Optional<Boolean> getReturnNew();
@@ -47,5 +53,34 @@ public interface DocumentCreateOptions {
      * the {@code overwrite} option is used.
      */
     Optional<Boolean> getReturnOld();
+
+    /**
+     * @return If set to true, the insert becomes a replace-insert. If a document with the same _key already exists the
+     * new document is not rejected with unique constraint violated but will replace the old document. Note that
+     * operations with overwrite parameter require a _key attribute in the request payload, therefore they can only be
+     * performed on collections sharded by _key.
+     */
+    Optional<Boolean> getOverwrite();
+
+    /**
+     * @return This option supersedes overwrite
+     */
+    Optional<OverwriteMode> getOverwriteMode();
+
+    /**
+     * @return If the intention is to delete existing attributes with the update-insert command, the URL query parameter
+     * keepNull can be used with a value of false. This will modify the behavior of the patch command to remove any
+     * attributes from the existing document that are contained in the patch document with an attribute value of null.
+     * This option controls the update-insert behavior only.
+     */
+    Optional<Boolean> getKeepNull();
+
+    /**
+     * @return Controls whether objects (not arrays) will be merged if present in both the existing and the
+     * update-insert document. If set to false, the value in the patch document will overwrite the existing document’s
+     * value. If set to true, objects will be merged. The default is true. This option controls the update-insert
+     * behavior only.
+     */
+    Optional<Boolean> getMergeObjects();
 
 }

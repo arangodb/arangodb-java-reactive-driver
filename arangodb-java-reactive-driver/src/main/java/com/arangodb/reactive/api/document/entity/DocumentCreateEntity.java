@@ -24,6 +24,7 @@ package com.arangodb.reactive.api.document.entity;
 import com.arangodb.reactive.entity.GenerateBuilder;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import javax.annotation.Nullable;
@@ -39,6 +40,10 @@ public interface DocumentCreateEntity<T> extends DocumentEntity {
     static <T> DocumentCreateEntityBuilder<T> builder() {
         return new DocumentCreateEntityBuilder<>();
     }
+
+    @JsonProperty("_oldRev")
+    @Nullable
+    String getOldRev();
 
     /**
      * @return If the query parameter returnNew is true, then the complete new document is returned.
