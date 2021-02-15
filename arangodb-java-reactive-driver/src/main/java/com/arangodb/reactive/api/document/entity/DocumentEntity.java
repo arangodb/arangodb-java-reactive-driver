@@ -22,12 +22,18 @@
 package com.arangodb.reactive.api.document.entity;
 
 
+import com.arangodb.reactive.entity.GenerateBuilder;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Michele Rastelli
  */
+@GenerateBuilder
 public interface DocumentEntity {
+
+    static DocumentEntityBuilder builder() {
+        return new DocumentEntityBuilder();
+    }
 
     /**
      * @return the document identifier

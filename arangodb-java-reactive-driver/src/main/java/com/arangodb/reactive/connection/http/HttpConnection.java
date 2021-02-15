@@ -44,6 +44,7 @@ import reactor.netty.resources.ConnectionProvider;
 
 import javax.annotation.Nullable;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -96,8 +97,8 @@ abstract class HttpConnection extends ArangoConnection {
     }
 
     private static void addHeaders(final ArangoRequest request, final HttpHeaders headers) {
-        for (final Entry<String, String> header : request.getHeaderParams().entrySet()) {
-            headers.add(header.getKey(), header.getValue());
+        for (final Entry<String, Optional<String>> header : request.getHeaderParams().entrySet()) {
+            header.getValue().ifPresent(value -> headers.add(header.getKey(), value));
         }
     }
 

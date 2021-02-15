@@ -57,7 +57,7 @@ class HttpConnectionEchoTest {
 
     private final String body = "{\"message\": \"Hello World!\"}";
 
-    private final Map.Entry<String, String> headerParam = MapEntry.entry("header-param-key", "headerParamValue");
+    private final Map.Entry<String, Optional<String>> headerParam = MapEntry.entry("header-param-key", Optional.of("headerParamValue"));
     private final Map.Entry<String, Optional<String>> queryParam = MapEntry.entry("query-param-key", Optional.of("queryParamValue"));
 
     private final ArangoRequest request = ArangoRequest.builder()

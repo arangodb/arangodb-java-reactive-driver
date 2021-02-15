@@ -25,7 +25,9 @@ import com.arangodb.codegen.GenerateSyncApi;
 import com.arangodb.codegen.SyncApiDelegator;
 import com.arangodb.reactive.api.collection.ArangoCollection;
 import com.arangodb.reactive.api.document.entity.DocumentCreateEntity;
+import com.arangodb.reactive.api.document.entity.DocumentEntity;
 import com.arangodb.reactive.api.document.options.DocumentCreateOptions;
+import com.arangodb.reactive.api.document.options.DocumentReadOptions;
 import com.arangodb.reactive.api.reactive.ArangoClient;
 import reactor.core.publisher.Mono;
 
@@ -52,11 +54,38 @@ public interface ArangoDocument extends ArangoClient {
      * @return information about the document
      * @see <a href="https://www.arangodb.com/docs/stable/http/document-working-with-documents.html#create-document">API
      * Documentation</a>
+     *
+     * TODO: add and test @throws
      */
     <T> Mono<DocumentCreateEntity<T>> createDocument(T value, DocumentCreateOptions options);
 
     default <T> Mono<DocumentCreateEntity<T>> createDocument(T value) {
         return createDocument(value, DocumentCreateOptions.builder().build());
+    }
+
+    /**
+     * Read document header
+     *
+     * @param key
+     *         The key of the document
+     * @param options
+     *         Additional options
+     * @return header fields of a single document
+     *
+     * @throws com.arangodb.reactive.exceptions.server.PreconditionFailedException
+     *         if an “If-Match” header is given and the found document has a different version. The response will also
+     *         contain the found document’s current revision in the Etag header
+     * @throws com.arangodb.reactive.exceptions.server.NotModifiedException
+     *         if the “If-None-Match” header is given and the document has the same version
+     * @throws com.arangodb.reactive.exceptions.server.NotFoundException
+     *         if the document or the collection or the database was not found
+     * @see <a href="https://www.arangodb.com/docs/stable/http/document-working-with-documents.html#read-document-header">
+     * API Documentation</a>
+     */
+    Mono<DocumentEntity> getDocumentHeader(String key, DocumentReadOptions options);
+
+    default Mono<DocumentEntity> getDocumentHeader(String key) {
+        return getDocumentHeader(key, DocumentReadOptions.builder().build());
     }
 
 }

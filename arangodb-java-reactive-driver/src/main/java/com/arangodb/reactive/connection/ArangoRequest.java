@@ -55,7 +55,7 @@ public interface ArangoRequest {
 
     Map<String, Optional<String>> getQueryParams();
 
-    Map<String, String> getHeaderParams();
+    Map<String, Optional<String>> getHeaderParams();
 
     @Value.Default
     @Value.Auxiliary

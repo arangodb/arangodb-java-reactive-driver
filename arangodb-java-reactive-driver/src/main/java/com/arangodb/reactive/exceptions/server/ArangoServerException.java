@@ -23,12 +23,37 @@ package com.arangodb.reactive.exceptions.server;
 import com.arangodb.reactive.entity.model.ErrorEntity;
 import com.arangodb.reactive.exceptions.ArangoException;
 
+import java.util.Optional;
+
 /**
  * @author Michele Rastelli
  */
 public abstract class ArangoServerException extends ArangoException {
 
     public static ArangoServerException of(final int responseCode, final ErrorEntity errorEntity) {
+
+        // Server Exceptions without body response (eg. returned from HEAD methods)
+        if (errorEntity == null) {
+            switch (responseCode) {
+                case NotModifiedException.RESPONSE_CODE:
+                    return new NotModifiedExceptionBuilder()
+                            .responseCode(responseCode)
+                            .build();
+                case PreconditionFailedException.RESPONSE_CODE:
+                    return new PreconditionFailedExceptionBuilder()
+                            .responseCode(responseCode)
+                            .build();
+                case NotFoundException.RESPONSE_CODE:
+                    return new NotFoundExceptionBuilder()
+                            .responseCode(responseCode)
+                            .build();
+                default:
+                    return new GenericArangoServerExceptionBuilder()
+                            .responseCode(responseCode)
+                            .build();
+            }
+        }
+
         switch (errorEntity.getErrorNum()) {
             case CollectionOrViewNotFoundException.ERROR_NUM:
                 return new CollectionOrViewNotFoundExceptionBuilder()
@@ -45,6 +70,6 @@ public abstract class ArangoServerException extends ArangoException {
 
     public abstract int getResponseCode();
 
-    public abstract ErrorEntity getEntity();
+    public abstract Optional<ErrorEntity> getEntity();
 
 }

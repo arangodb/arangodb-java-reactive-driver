@@ -1,7 +1,7 @@
 /*
  * DISCLAIMER
  *
- * Copyright 2018 ArangoDB GmbH, Cologne, Germany
+ * Copyright 2016 ArangoDB GmbH, Cologne, Germany
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,17 @@
  * Copyright holder is ArangoDB GmbH, Cologne, Germany
  */
 
-package com.arangodb.reactive.api.util;
+package com.arangodb.reactive.exceptions.server;
+
+
+import com.arangodb.reactive.entity.GeneratePackagePrivateBuilder;
 
 /**
- * @author Mark Vollmary
+ * ArangoServerException without body response (eg. returned from HEAD methods) and response code 404
+ *
+ * @author Michele Rastelli
  */
-public final class ArangoRequestParam {
-
-    public static final String DATABASE = "database";
-
-    private ArangoRequestParam() {
-    }
-
+@GeneratePackagePrivateBuilder
+public abstract class NotFoundException extends ArangoServerException {
+    static final int RESPONSE_CODE = 404;
 }

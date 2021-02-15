@@ -76,7 +76,7 @@ class InternalSerdeTest {
                 .database("database")
                 .requestType(ArangoRequest.RequestType.GET)
                 .path("path")
-                .putHeaderParams("headerParamKey", "headerParamValue")
+                .putHeaderParams("headerParamKey", Optional.of("headerParamValue"))
                 .putQueryParams("queryParamKey", Optional.of("queryParamValue"))
                 .build();
 
@@ -91,7 +91,7 @@ class InternalSerdeTest {
         request.getQueryParams().forEach((k, v) -> builder.add(k, v.get()));
         builder.close();
         builder.add(ValueType.OBJECT);
-        request.getHeaderParams().forEach(builder::add);
+        request.getHeaderParams().forEach((k, v) -> builder.add(k, v.get()));
         builder.close();
         builder.close();
 
@@ -109,9 +109,9 @@ class InternalSerdeTest {
         assertThat(firstQueryParamSliceEntry.getValue().getAsString()).isEqualTo(firstQueryParamEntry.getValue().get());
 
         Map.Entry<String, VPackSlice> firstHeaderParamSliceEntry = iterator.next().objectIterator().next();
-        Map.Entry<String, String> firstHeaderParamEntry = request.getHeaderParams().entrySet().iterator().next();
+        Map.Entry<String, Optional<String>> firstHeaderParamEntry = request.getHeaderParams().entrySet().iterator().next();
         assertThat(firstHeaderParamSliceEntry.getKey()).isEqualTo(firstHeaderParamEntry.getKey());
-        assertThat(firstHeaderParamSliceEntry.getValue().getAsString()).isEqualTo(firstHeaderParamEntry.getValue());
+        assertThat(firstHeaderParamSliceEntry.getValue().getAsString()).isEqualTo(firstHeaderParamEntry.getValue().get());
     }
 
 }

@@ -85,6 +85,9 @@ public abstract class ArangoSerde {
     }
 
     public final <T> T deserialize(final byte[] buffer, final JavaType clazz) {
+        if (buffer.length == 0) {
+            return null;
+        }
         return wrapSerdeException(() ->
                 mapper.readerFor(clazz).readValue(buffer)
         );

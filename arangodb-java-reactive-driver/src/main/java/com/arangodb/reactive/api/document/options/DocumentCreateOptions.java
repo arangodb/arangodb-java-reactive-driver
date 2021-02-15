@@ -34,6 +34,14 @@ import java.util.Optional;
 @GenerateBuilder
 public interface DocumentCreateOptions {
 
+    String WAIT_FOR_SYNC = "waitForSync";
+    String RETURN_NEW = "returnNew";
+    String RETURN_OLD = "returnOld";
+    String OVERWRITE = "overwrite";
+    String OVERWRITE_MODE = "overwriteMode";
+    String KEEP_NULL = "keepNull";
+    String MERGE_OBJECTS = "mergeObjects";
+
     static DocumentCreateOptionsBuilder builder() {
         return new DocumentCreateOptionsBuilder();
     }

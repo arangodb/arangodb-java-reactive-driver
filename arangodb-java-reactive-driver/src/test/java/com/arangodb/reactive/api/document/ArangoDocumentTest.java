@@ -22,13 +22,19 @@ package com.arangodb.reactive.api.document;
 
 
 import com.arangodb.reactive.api.document.entity.DocumentCreateEntity;
+import com.arangodb.reactive.api.document.entity.DocumentEntity;
 import com.arangodb.reactive.api.document.entity.OverwriteMode;
 import com.arangodb.reactive.api.document.options.DocumentCreateOptions;
+import com.arangodb.reactive.api.document.options.DocumentReadOptions;
 import com.arangodb.reactive.api.utils.ArangoApiTest;
 import com.arangodb.reactive.api.utils.ArangoApiTestClass;
 import com.arangodb.reactive.entity.serde.Id;
 import com.arangodb.reactive.entity.serde.Key;
 import com.arangodb.reactive.entity.serde.Rev;
+import com.arangodb.reactive.exceptions.server.ArangoServerException;
+import com.arangodb.reactive.exceptions.server.NotFoundException;
+import com.arangodb.reactive.exceptions.server.NotModifiedException;
+import com.arangodb.reactive.exceptions.server.PreconditionFailedException;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,12 +42,29 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 /**
  * @author Michele Rastelli
  */
 @ArangoApiTestClass
 public class ArangoDocumentTest {
+
+    static class MyDoc {
+        @Key
+        public String key;
+
+        @Id
+        public String id;
+
+        @Rev
+        public String rev;
+
+        public Map<String, Object> data;
+
+        MyDoc() {
+        }
+    }
 
     @ArangoApiTest
     void createDocument(ArangoDocumentSync documentApi) {
@@ -186,20 +209,64 @@ public class ArangoDocumentTest {
         assertThat(updated.getOld()).isNull();
     }
 
-    static class MyDoc {
-        @Key
-        public String key;
+    @ArangoApiTest
+    void getDocumentHead(ArangoDocumentSync documentApi) {
+        MyDoc docA = new MyDoc();
+        docA.key = "key-" + UUID.randomUUID().toString();
+        docA.data = Map.of("k1", "v1A");
+        DocumentCreateEntity<MyDoc> created = documentApi.createDocument(docA);
+        DocumentEntity head = documentApi.getDocumentHeader(docA.key);
+        assertThat(head.getId()).isEqualTo(created.getId());
+        assertThat(head.getKey()).isEqualTo(created.getKey());
+        assertThat(head.getRev()).isEqualTo(created.getRev());
+    }
 
-        @Id
-        public String id;
+    @ArangoApiTest
+    void getDocumentHeadMatch(ArangoDocumentSync documentApi) {
+        MyDoc docA = new MyDoc();
+        docA.key = "key-" + UUID.randomUUID().toString();
+        docA.data = Map.of("k1", "v1A");
+        DocumentCreateEntity<MyDoc> created = documentApi.createDocument(docA);
 
-        @Rev
-        public String rev;
+        DocumentEntity matchingHead = documentApi.getDocumentHeader(docA.key, DocumentReadOptions.builder()
+                .ifMatch(created.getRev()).build());
+        assertThat(matchingHead.getId()).isEqualTo(created.getId());
+        assertThat(matchingHead.getKey()).isEqualTo(created.getKey());
+        assertThat(matchingHead.getRev()).isEqualTo(created.getRev());
 
-        public Map<String, Object> data;
+        Throwable matchingHeadFail = catchThrowable(() -> documentApi
+                .getDocumentHeader(docA.key, DocumentReadOptions.builder().ifMatch("nonMatchingEtag").build()));
 
-        MyDoc() {
-        }
+        assertThat(matchingHeadFail).isNotNull();
+        assertThat(matchingHeadFail).isInstanceOf(PreconditionFailedException.class);
+        ArangoServerException matchingHeadEx = (ArangoServerException) matchingHeadFail;
+        assertThat(matchingHeadEx.getResponseCode()).isEqualTo(412);
+        assertThat(matchingHeadEx.getEntity()).isNotPresent();
+
+        DocumentEntity noneMatchingHead = documentApi.getDocumentHeader(docA.key, DocumentReadOptions.builder()
+                .ifNoneMatch("nonMatchingEtag").build());
+        assertThat(noneMatchingHead.getId()).isEqualTo(created.getId());
+        assertThat(noneMatchingHead.getKey()).isEqualTo(created.getKey());
+        assertThat(noneMatchingHead.getRev()).isEqualTo(created.getRev());
+
+        Throwable noneMatchingHeadFail = catchThrowable(() -> documentApi
+                .getDocumentHeader(docA.key, DocumentReadOptions.builder().ifNoneMatch(created.getRev()).build()));
+
+        assertThat(noneMatchingHeadFail).isNotNull();
+        assertThat(noneMatchingHeadFail).isInstanceOf(NotModifiedException.class);
+        ArangoServerException noneMatchingHeadEx = (ArangoServerException) noneMatchingHeadFail;
+        assertThat(noneMatchingHeadEx.getResponseCode()).isEqualTo(304);
+        assertThat(noneMatchingHeadEx.getEntity()).isNotPresent();
+
+        Throwable nonExistingFail = catchThrowable(() -> documentApi.getDocumentHeader("nonExistingKey"));
+
+        assertThat(nonExistingFail).isNotNull();
+        assertThat(nonExistingFail).isInstanceOf(NotFoundException.class);
+        ArangoServerException nonExistingEx = (ArangoServerException) nonExistingFail;
+        assertThat(nonExistingEx.getResponseCode()).isEqualTo(404);
+        assertThat(nonExistingEx.getEntity()).isNotPresent();
+
+
     }
 
 }

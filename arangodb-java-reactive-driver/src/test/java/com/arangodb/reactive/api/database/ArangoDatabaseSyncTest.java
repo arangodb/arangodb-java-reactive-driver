@@ -117,7 +117,7 @@ class ArangoDatabaseSyncTest {
             assertThat(thrown).isInstanceOf(ArangoServerException.class);
             assertThat(thrown.getMessage()).contains("database not found");
             assertThat(((ArangoServerException) thrown).getResponseCode()).isEqualTo(404);
-            assertThat(((ArangoServerException) thrown).getEntity().getErrorNum()).isEqualTo(1228);
+            assertThat(((ArangoServerException) thrown).getEntity().get().getErrorNum()).isEqualTo(1228);
         }
     }
 

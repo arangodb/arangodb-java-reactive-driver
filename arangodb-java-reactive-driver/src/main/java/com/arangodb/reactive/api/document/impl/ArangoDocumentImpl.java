@@ -24,26 +24,21 @@ package com.arangodb.reactive.api.document.impl;
 import com.arangodb.reactive.api.collection.ArangoCollection;
 import com.arangodb.reactive.api.document.ArangoDocument;
 import com.arangodb.reactive.api.document.entity.DocumentCreateEntity;
+import com.arangodb.reactive.api.document.entity.DocumentEntity;
 import com.arangodb.reactive.api.document.entity.OverwriteMode;
 import com.arangodb.reactive.api.document.options.DocumentCreateOptions;
+import com.arangodb.reactive.api.document.options.DocumentReadOptions;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
 import com.arangodb.reactive.api.util.ApiPath;
 import com.arangodb.reactive.connection.ArangoRequest;
 import com.arangodb.reactive.connection.ArangoResponse;
 import reactor.core.publisher.Mono;
 
+
 /**
  * @author Michele Rastelli
  */
 public final class ArangoDocumentImpl extends ArangoClientImpl implements ArangoDocument {
-
-    private static final String WAIT_FOR_SYNC = "waitForSync";
-    private static final String RETURN_NEW = "returnNew";
-    private static final String RETURN_OLD = "returnOld";
-    private static final String OVERWRITE = "overwrite";
-    private static final String OVERWRITE_MODE = "overwriteMode";
-    private static final String KEEP_NULL = "keepNull";
-    private static final String MERGE_OBJECTS = "mergeObjects";
 
     private final ArangoCollection collection;
 
@@ -60,20 +55,19 @@ public final class ArangoDocumentImpl extends ArangoClientImpl implements Arango
     @Override
     public <T> Mono<DocumentCreateEntity<T>> createDocument(final T value, final DocumentCreateOptions options) {
         return getCommunication()
-                .execute(
-                        ArangoRequest.builder()
-                                .database(collection.database().getName())
-                                .requestType(ArangoRequest.RequestType.POST)
-                                .path(ApiPath.DOCUMENT + "/" + collection.getName())
-                                .putQueryParams(WAIT_FOR_SYNC, options.getWaitForSync().map(Object::toString))
-                                .putQueryParams(RETURN_NEW, options.getReturnNew().map(Object::toString))
-                                .putQueryParams(RETURN_OLD, options.getReturnOld().map(Object::toString))
-                                .putQueryParams(OVERWRITE, options.getOverwrite().map(Object::toString))
-                                .putQueryParams(OVERWRITE_MODE, options.getOverwriteMode().map(OverwriteMode::getValue))
-                                .putQueryParams(KEEP_NULL, options.getKeepNull().map(Object::toString))
-                                .putQueryParams(MERGE_OBJECTS, options.getMergeObjects().map(Object::toString))
-                                .body(getUserSerde().serialize(value))
-                                .build()
+                .execute(ArangoRequest.builder()
+                        .database(collection.database().getName())
+                        .requestType(ArangoRequest.RequestType.POST)
+                        .path(ApiPath.DOCUMENT + "/" + collection.getName())
+                        .putQueryParams(DocumentCreateOptions.WAIT_FOR_SYNC, options.getWaitForSync().map(Object::toString))
+                        .putQueryParams(DocumentCreateOptions.RETURN_NEW, options.getReturnNew().map(Object::toString))
+                        .putQueryParams(DocumentCreateOptions.RETURN_OLD, options.getReturnOld().map(Object::toString))
+                        .putQueryParams(DocumentCreateOptions.OVERWRITE, options.getOverwrite().map(Object::toString))
+                        .putQueryParams(DocumentCreateOptions.OVERWRITE_MODE, options.getOverwriteMode().map(OverwriteMode::getValue))
+                        .putQueryParams(DocumentCreateOptions.KEEP_NULL, options.getKeepNull().map(Object::toString))
+                        .putQueryParams(DocumentCreateOptions.MERGE_OBJECTS, options.getMergeObjects().map(Object::toString))
+                        .body(getUserSerde().serialize(value))
+                        .build()
                 )
                 .map(ArangoResponse::getBody)
                 .map(bytes -> {
@@ -89,4 +83,25 @@ public final class ArangoDocumentImpl extends ArangoClientImpl implements Arango
                             .build();
                 });
     }
+
+    @Override
+    public Mono<DocumentEntity> getDocumentHeader(final String key, final DocumentReadOptions options) {
+        return getCommunication()
+                .execute(ArangoRequest.builder()
+                        .database(collection.database().getName())
+                        .requestType(ArangoRequest.RequestType.HEAD)
+                        .path(ApiPath.DOCUMENT + "/" + collection.getName() + "/" + key)
+                        .putHeaderParams(DocumentReadOptions.IF_MATCH, options.getIfMatch())
+                        .putHeaderParams(DocumentReadOptions.IF_NONE_MATCH, options.getIfNoneMatch())
+                        .build()
+                )
+                .map(arangoResponse -> arangoResponse.getMeta().get("Etag"))
+                .map(etag -> DocumentEntity.builder()
+                        .id(collection.getName() + "/" + key)
+                        .key(key)
+                        .rev(etag.replace("\"", ""))
+                        .build()
+                );
+    }
+
 }
