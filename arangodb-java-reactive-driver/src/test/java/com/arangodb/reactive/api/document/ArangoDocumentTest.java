@@ -24,6 +24,7 @@ package com.arangodb.reactive.api.document;
 import com.arangodb.reactive.api.document.entity.DocumentCreateEntity;
 import com.arangodb.reactive.api.document.entity.DocumentEntity;
 import com.arangodb.reactive.api.document.entity.OverwriteMode;
+import com.arangodb.reactive.api.document.entity.SyncState;
 import com.arangodb.reactive.api.document.options.DocumentCreateOptions;
 import com.arangodb.reactive.api.document.options.DocumentReadOptions;
 import com.arangodb.reactive.api.utils.ArangoApiTest;
@@ -83,6 +84,7 @@ public class ArangoDocumentTest {
         assertThat(created.getOldRev()).isNull();
         assertThat(created.getNew()).isNotNull();
         assertThat(created.getOld()).isNull();
+        assertThat(created.getSyncState()).isEqualTo(SyncState.ACCEPTED);
 
         MyDoc createdDoc = created.getNew();
 
@@ -125,6 +127,7 @@ public class ArangoDocumentTest {
         assertThat(updated.getOldRev()).isEqualTo(created.getRev());
         assertThat(updated.getNew()).isNotNull();
         assertThat(updated.getOld()).isNotNull();
+        assertThat(updated.getSyncState()).isEqualTo(SyncState.CREATED);
 
         MyDoc oldDoc = updated.getOld();
         assertThat(oldDoc.key).isEqualTo(created.getKey());
@@ -168,6 +171,7 @@ public class ArangoDocumentTest {
         assertThat(updated.getOldRev()).isEqualTo(created.getRev());
         assertThat(updated.getNew()).isNotNull();
         assertThat(updated.getOld()).isNotNull();
+        assertThat(updated.getSyncState()).isEqualTo(SyncState.CREATED);
 
         MyDoc oldDoc = updated.getOld();
         assertThat(oldDoc.key).isEqualTo(created.getKey());
@@ -195,7 +199,7 @@ public class ArangoDocumentTest {
         docB.data = Map.of("k1", "v1B");
         DocumentCreateEntity<MyDoc> updated = documentApi.createDocument(docB,
                 DocumentCreateOptions.builder()
-                        .waitForSync(true)
+                        .waitForSync(false)
                         .returnNew(true)
                         .returnOld(true)
                         .overwriteMode(OverwriteMode.IGNORE)
@@ -207,6 +211,7 @@ public class ArangoDocumentTest {
         assertThat(updated.getOldRev()).isNull();
         assertThat(updated.getNew()).isNull();
         assertThat(updated.getOld()).isNull();
+        assertThat(updated.getSyncState()).isEqualTo(SyncState.ACCEPTED);
     }
 
     @ArangoApiTest
@@ -265,8 +270,6 @@ public class ArangoDocumentTest {
         ArangoServerException nonExistingEx = (ArangoServerException) nonExistingFail;
         assertThat(nonExistingEx.getResponseCode()).isEqualTo(404);
         assertThat(nonExistingEx.getEntity()).isNotPresent();
-
-
     }
 
 }

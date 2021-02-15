@@ -62,4 +62,7 @@ public interface DocumentCreateEntity<T> extends DocumentEntity {
     @Nullable
     T getOld();
 
+    @JsonIgnore
+    SyncState getSyncState();
+
 }

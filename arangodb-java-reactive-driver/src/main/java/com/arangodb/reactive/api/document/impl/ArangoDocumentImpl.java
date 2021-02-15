@@ -24,14 +24,15 @@ package com.arangodb.reactive.api.document.impl;
 import com.arangodb.reactive.api.collection.ArangoCollection;
 import com.arangodb.reactive.api.document.ArangoDocument;
 import com.arangodb.reactive.api.document.entity.DocumentCreateEntity;
+import com.arangodb.reactive.api.document.entity.DocumentCreateEntityBuilder;
 import com.arangodb.reactive.api.document.entity.DocumentEntity;
 import com.arangodb.reactive.api.document.entity.OverwriteMode;
+import com.arangodb.reactive.api.document.entity.SyncState;
 import com.arangodb.reactive.api.document.options.DocumentCreateOptions;
 import com.arangodb.reactive.api.document.options.DocumentReadOptions;
 import com.arangodb.reactive.api.reactive.impl.ArangoClientImpl;
 import com.arangodb.reactive.api.util.ApiPath;
 import com.arangodb.reactive.connection.ArangoRequest;
-import com.arangodb.reactive.connection.ArangoResponse;
 import reactor.core.publisher.Mono;
 
 
@@ -69,15 +70,16 @@ public final class ArangoDocumentImpl extends ArangoClientImpl implements Arango
                         .body(getUserSerde().serialize(value))
                         .build()
                 )
-                .map(ArangoResponse::getBody)
-                .map(bytes -> {
+                .map(response -> {
+                    byte[] body = response.getBody();
                     @SuppressWarnings("unchecked")
                     Class<T> type = (Class<T>) value.getClass();
-                    T newValue = getUserSerde().deserializeAtJsonPointer("/new", bytes, type);
-                    T oldValue = getUserSerde().deserializeAtJsonPointer("/old", bytes, type);
-                    DocumentCreateEntity<?> dce = getSerde().deserialize(bytes, DocumentCreateEntity.class);
-                    return DocumentCreateEntity.<T>builder()
-                            .from(dce)
+                    T newValue = getUserSerde().deserializeAtJsonPointer("/new", body, type);
+                    T oldValue = getUserSerde().deserializeAtJsonPointer("/old", body, type);
+                    @SuppressWarnings("unchecked")
+                    DocumentCreateEntityBuilder<T> dce = getSerde().deserialize(body, DocumentCreateEntityBuilder.class);
+                    return dce
+                            .syncState(SyncState.of(response.getResponseCode()))
                             .getNew(newValue)
                             .old(oldValue)
                             .build();
