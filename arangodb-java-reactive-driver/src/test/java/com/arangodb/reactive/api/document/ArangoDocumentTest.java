@@ -29,6 +29,7 @@ import com.arangodb.reactive.api.document.options.DocumentCreateOptions;
 import com.arangodb.reactive.api.document.options.DocumentReadOptions;
 import com.arangodb.reactive.api.utils.ArangoApiTest;
 import com.arangodb.reactive.api.utils.ArangoApiTestClass;
+import com.arangodb.reactive.api.utils.TestContext;
 import com.arangodb.reactive.entity.serde.Id;
 import com.arangodb.reactive.entity.serde.Key;
 import com.arangodb.reactive.entity.serde.Rev;
@@ -44,6 +45,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * @author Michele Rastelli
@@ -95,7 +97,49 @@ public class ArangoDocumentTest {
     }
 
     @ArangoApiTest
-    void createDocumentOverwriteUpdate(ArangoDocumentSync documentApi) {
+    void createDocumentOverwrite(ArangoDocumentSync documentApi) {
+        MyDoc docA = new MyDoc();
+        docA.key = "key-" + UUID.randomUUID().toString();
+        docA.data = Map.of("k1", "v1A");
+        DocumentCreateEntity<MyDoc> created = documentApi.createDocument(docA);
+
+        MyDoc docB = new MyDoc();
+        docB.key = docA.key;
+        docB.data = Map.of("k1", "v1B");
+        DocumentCreateEntity<MyDoc> updated = documentApi.createDocument(docB,
+                DocumentCreateOptions.builder()
+                        .waitForSync(true)
+                        .returnNew(true)
+                        .returnOld(true)
+                        .overwrite(true)
+                        .build());
+
+        assertThat(updated.getId()).isEqualTo(documentApi.collection().getName() + "/" + docB.key);
+        assertThat(updated.getKey()).isEqualTo(docB.key);
+        assertThat(updated.getRev()).isNotNull();
+        assertThat(updated.getOldRev()).isEqualTo(created.getRev());
+        assertThat(updated.getNew()).isNotNull();
+        assertThat(updated.getOld()).isNotNull();
+        assertThat(updated.getSyncState()).isEqualTo(SyncState.CREATED);
+
+        MyDoc oldDoc = updated.getOld();
+        assertThat(oldDoc.key).isEqualTo(created.getKey());
+        assertThat(oldDoc.id).isEqualTo(created.getId());
+        assertThat(oldDoc.rev).isEqualTo(created.getRev());
+        assertThat(oldDoc.data).isEqualTo(docA.data);
+
+        MyDoc updatedDoc = updated.getNew();
+
+        assertThat(updatedDoc.key).isEqualTo(updated.getKey());
+        assertThat(updatedDoc.id).isEqualTo(updated.getId());
+        assertThat(updatedDoc.rev).isEqualTo(updated.getRev());
+        assertThat(updatedDoc.data).isEqualTo(docB.data);
+    }
+
+    @ArangoApiTest
+    void createDocumentOverwriteUpdate(TestContext ctx, ArangoDocumentSync documentApi) {
+        assumeTrue(ctx.isAtLeastVersion(3, 7), "Required db version >= 3.7");
+
         MyDoc docA = new MyDoc();
         docA.key = "key-" + UUID.randomUUID().toString();
         docA.data = Map.of(
@@ -148,7 +192,9 @@ public class ArangoDocumentTest {
     }
 
     @ArangoApiTest
-    void createDocumentOverwriteReplace(ArangoDocumentSync documentApi) {
+    void createDocumentOverwriteReplace(TestContext ctx, ArangoDocumentSync documentApi) {
+        assumeTrue(ctx.isAtLeastVersion(3, 7), "Required db version >= 3.7");
+
         MyDoc docA = new MyDoc();
         docA.key = "key-" + UUID.randomUUID().toString();
         docA.data = Map.of("k1", "v1A");
@@ -188,7 +234,9 @@ public class ArangoDocumentTest {
     }
 
     @ArangoApiTest
-    void createDocumentOverwriteIgnore(ArangoDocumentSync documentApi) {
+    void createDocumentOverwriteIgnore(TestContext ctx, ArangoDocumentSync documentApi) {
+        assumeTrue(ctx.isAtLeastVersion(3, 7), "Required db version >= 3.7");
+
         MyDoc docA = new MyDoc();
         docA.key = "key-" + UUID.randomUUID().toString();
         docA.data = Map.of("k1", "v1A");

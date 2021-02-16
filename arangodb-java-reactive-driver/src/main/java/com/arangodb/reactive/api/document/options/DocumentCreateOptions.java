@@ -72,6 +72,8 @@ public interface DocumentCreateOptions {
 
     /**
      * @return This option supersedes overwrite
+     *
+     * @since ArangoDB 3.7
      */
     Optional<OverwriteMode> getOverwriteMode();
 
