@@ -97,7 +97,7 @@ public final class ArangoDocumentImpl extends ArangoClientImpl implements Arango
                         .putHeaderParams(DocumentReadOptions.IF_NONE_MATCH, options.getIfNoneMatch())
                         .build()
                 )
-                .map(arangoResponse -> arangoResponse.getMeta().get("Etag"))
+                .map(arangoResponse -> arangoResponse.getMeta().get("etag"))
                 .map(etag -> DocumentEntity.builder()
                         .id(collection.getName() + "/" + key)
                         .key(key)

@@ -28,6 +28,7 @@ import com.arangodb.velocypack.VPackSlice;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -52,7 +53,7 @@ final class VPackVstDeserializers {
             Iterator<Map.Entry<String, VPackSlice>> metaIterator = vpack.get(3).objectIterator();
             while (metaIterator.hasNext()) {
                 Map.Entry<String, VPackSlice> meta = metaIterator.next();
-                builder.putMeta(meta.getKey(), meta.getValue().getAsString());
+                builder.putMeta(meta.getKey().toLowerCase(Locale.ROOT), meta.getValue().getAsString());
             }
         }
 

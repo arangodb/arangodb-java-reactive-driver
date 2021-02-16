@@ -215,7 +215,7 @@ public class ArangoDocumentTest {
     }
 
     @ArangoApiTest
-    void getDocumentHead(ArangoDocumentSync documentApi) {
+    void getDocumentHeader(ArangoDocumentSync documentApi) {
         MyDoc docA = new MyDoc();
         docA.key = "key-" + UUID.randomUUID().toString();
         docA.data = Map.of("k1", "v1A");

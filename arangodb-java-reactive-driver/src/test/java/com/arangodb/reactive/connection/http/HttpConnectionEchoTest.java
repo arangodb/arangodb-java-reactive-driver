@@ -97,7 +97,7 @@ class HttpConnectionEchoTest {
 
         // headers
         assertThat(response.getMeta()).containsKey(headerParam.getKey());
-        assertThat(response.getMeta().get(headerParam.getKey())).isEqualTo(headerParam.getValue());
+        assertThat(response.getMeta().get(headerParam.getKey())).isEqualTo(headerParam.getValue().get());
 
         // accept header
         assertThat(response.getMeta()).containsKey("accept");

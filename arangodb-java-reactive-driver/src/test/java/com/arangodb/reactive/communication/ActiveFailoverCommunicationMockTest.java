@@ -196,7 +196,7 @@ public class ActiveFailoverCommunicationMockTest {
         assertThat(thrown).isInstanceOf(ArangoServerException.class);
         ArangoServerException e = (ArangoServerException) thrown;
         assertThat(e.getResponseCode()).isEqualTo(503);
-        assertThat(e.getEntity()).usingRecursiveComparison().isEqualTo(error);
+        assertThat(e.getEntity().get()).usingRecursiveComparison().isEqualTo(error);
 
         assertThat(connectionPool.getLeader()).isEqualTo(hosts.get(1));
     }

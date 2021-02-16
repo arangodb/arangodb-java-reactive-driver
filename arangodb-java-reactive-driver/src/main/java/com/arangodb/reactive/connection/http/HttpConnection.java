@@ -43,6 +43,7 @@ import reactor.netty.http.client.HttpClientResponse;
 import reactor.netty.resources.ConnectionProvider;
 
 import javax.annotation.Nullable;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -98,7 +99,7 @@ abstract class HttpConnection extends ArangoConnection {
 
     private static void addHeaders(final ArangoRequest request, final HttpHeaders headers) {
         for (final Entry<String, Optional<String>> header : request.getHeaderParams().entrySet()) {
-            header.getValue().ifPresent(value -> headers.add(header.getKey(), value));
+            header.getValue().ifPresent(value -> headers.add(header.getKey().toLowerCase(Locale.ROOT), value));
         }
     }
 
@@ -246,8 +247,8 @@ abstract class HttpConnection extends ArangoConnection {
                 })
                 .map(buffer -> ArangoResponse.builder()
                         .responseCode(resp.status().code())
-                        .putAllMeta(resp.responseHeaders().entries().stream()
-                                .collect(Collectors.toMap(Entry::getKey, Entry::getValue)))
+                        .putAllMeta(resp.responseHeaders().entries().stream().collect(Collectors.toMap(
+                                e -> e.getKey().toLowerCase(Locale.ROOT), Entry::getValue)))
                         .body(buffer)
                         .build())
                 .doOnNext(it -> {
