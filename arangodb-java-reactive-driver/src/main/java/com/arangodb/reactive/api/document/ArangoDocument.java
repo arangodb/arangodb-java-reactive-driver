@@ -47,15 +47,19 @@ public interface ArangoDocument extends ArangoClient {
      * Creates a new document from the given document, unless there is already a document with the _key given. If no
      * _key is given, a new unique _key is generated automatically.
      * <p>
-     * // TODO: define which types of raw data we want to let pass through (eg. VPackSlice/byte[]/String/JsonNode/ObjectNode/...)
+     * // TODO: define which types of raw data we want to let pass through (eg. byte[]/String/JsonNode/ObjectNode/ArrayNode/...)
      *
-     * @param value   A representation of a single document (POJO, ... )
-     * @param options Additional options
+     * @param value
+     *         A representation of a single document (POJO, ... )
+     * @param options
+     *         Additional options
      * @return information about the document
+     *
+     * @throws com.arangodb.reactive.exceptions.server.ConstraintViolatedException
+     *         if a document with the same qualifiers in an indexed attribute conflicts with an already existing
+     *         document and thus violates that unique constraint
      * @see <a href="https://www.arangodb.com/docs/stable/http/document-working-with-documents.html#create-document">API
      * Documentation</a>
-     *
-     * TODO: add and test @throws
      */
     <T> Mono<DocumentCreateEntity<T>> createDocument(T value, DocumentCreateOptions options);
 

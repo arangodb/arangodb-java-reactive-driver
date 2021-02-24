@@ -56,12 +56,9 @@ public final class ArangoDatabaseImpl extends ArangoClientImpl implements Arango
 
     private final String name;
 
-    private final String adminDB;
-
     public ArangoDatabaseImpl(final ArangoDB arangoDB, final String dbName) {
         super((ArangoClientImpl) arangoDB);
         name = dbName;
-        adminDB = arangoDB.getAdminDB();
     }
 
     @Override

@@ -72,6 +72,11 @@ public abstract class ArangoServerException extends ArangoException {
                         .responseCode(responseCode)
                         .entity(errorEntity)
                         .build();
+            case ConstraintViolatedException.ERROR_NUM:
+                return new ConstraintViolatedExceptionBuilder()
+                        .responseCode(responseCode)
+                        .entity(errorEntity)
+                        .build();
             default:
                 return new GenericArangoServerExceptionBuilder()
                         .responseCode(responseCode)

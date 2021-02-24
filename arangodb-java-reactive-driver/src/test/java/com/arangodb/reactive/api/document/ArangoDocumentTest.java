@@ -34,6 +34,7 @@ import com.arangodb.reactive.entity.serde.Id;
 import com.arangodb.reactive.entity.serde.Key;
 import com.arangodb.reactive.entity.serde.Rev;
 import com.arangodb.reactive.exceptions.server.ArangoServerException;
+import com.arangodb.reactive.exceptions.server.ConstraintViolatedException;
 import com.arangodb.reactive.exceptions.server.NotFoundException;
 import com.arangodb.reactive.exceptions.server.NotModifiedException;
 import com.arangodb.reactive.exceptions.server.PreconditionFailedException;
@@ -323,4 +324,11 @@ public class ArangoDocumentTest {
         assertThat(nonExistingEx.getEntity()).isNotPresent();
     }
 
+    @ArangoApiTest
+    void documentConflict(ArangoDocumentSync documentApi) {
+        String key = "key-" + UUID.randomUUID().toString();
+        documentApi.createDocument(Collections.singletonMap("_key", key));
+        Throwable thrown = catchThrowable(() -> documentApi.createDocument(Collections.singletonMap("_key", key)));
+        assertThat(thrown).isInstanceOf(ConstraintViolatedException.class);
+    }
 }
