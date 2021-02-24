@@ -21,6 +21,7 @@
 package com.arangodb.reactive.entity.model;
 
 import com.arangodb.reactive.entity.GeneratePackagePrivateBuilder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
@@ -28,6 +29,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  */
 @GeneratePackagePrivateBuilder
 @JsonDeserialize(builder = ErrorEntityBuilder.class)
+// FIXME: https://arangodb.atlassian.net/browse/BTS-317
+@JsonIgnoreProperties({"_id", "_key", "_rev"})
 public interface ErrorEntity extends ArangoEntity {
 
     String getErrorMessage();

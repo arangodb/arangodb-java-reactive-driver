@@ -37,6 +37,7 @@ import com.arangodb.reactive.exceptions.server.ArangoServerException;
 import com.arangodb.reactive.exceptions.server.NotFoundException;
 import com.arangodb.reactive.exceptions.server.NotModifiedException;
 import com.arangodb.reactive.exceptions.server.PreconditionFailedException;
+import org.assertj.core.data.MapEntry;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -100,12 +101,12 @@ public class ArangoDocumentTest {
     void createDocumentOverwrite(ArangoDocumentSync documentApi) {
         MyDoc docA = new MyDoc();
         docA.key = "key-" + UUID.randomUUID().toString();
-        docA.data = Map.of("k1", "v1A");
+        docA.data = Collections.singletonMap("k1", "v1A");
         DocumentCreateEntity<MyDoc> created = documentApi.createDocument(docA);
 
         MyDoc docB = new MyDoc();
         docB.key = docA.key;
-        docB.data = Map.of("k1", "v1B");
+        docB.data = Collections.singletonMap("k1", "v1B");
         DocumentCreateEntity<MyDoc> updated = documentApi.createDocument(docB,
                 DocumentCreateOptions.builder()
                         .waitForSync(true)
@@ -142,11 +143,10 @@ public class ArangoDocumentTest {
 
         MyDoc docA = new MyDoc();
         docA.key = "key-" + UUID.randomUUID().toString();
-        docA.data = Map.of(
-                "k1", "v1A",
-                "k2", "v2A",
-                "k3", "v3A"
-        );
+        docA.data = new HashMap<>();
+        docA.data.put("k1", "v1A");
+        docA.data.put("k2", "v2A");
+        docA.data.put("k3", "v3A");
         DocumentCreateEntity<MyDoc> created = documentApi.createDocument(docA);
 
         MyDoc docB = new MyDoc();
@@ -184,11 +184,11 @@ public class ArangoDocumentTest {
         assertThat(updatedDoc.key).isEqualTo(updated.getKey());
         assertThat(updatedDoc.id).isEqualTo(updated.getId());
         assertThat(updatedDoc.rev).isEqualTo(updated.getRev());
-        assertThat(updatedDoc.data).isEqualTo(Map.of(
-                "k1", "v1B",
-                "k2", "v2A",
-                "k4", "v4B"
-        ));
+        assertThat(updatedDoc.data).containsExactly(
+                MapEntry.entry("k1", "v1B"),
+                MapEntry.entry("k2", "v2A"),
+                MapEntry.entry("k4", "v4B")
+        );
     }
 
     @ArangoApiTest
@@ -197,12 +197,12 @@ public class ArangoDocumentTest {
 
         MyDoc docA = new MyDoc();
         docA.key = "key-" + UUID.randomUUID().toString();
-        docA.data = Map.of("k1", "v1A");
+        docA.data = Collections.singletonMap("k1", "v1A");
         DocumentCreateEntity<MyDoc> created = documentApi.createDocument(docA);
 
         MyDoc docB = new MyDoc();
         docB.key = docA.key;
-        docB.data = Map.of("k1", "v1B");
+        docB.data = Collections.singletonMap("k1", "v1B");
         DocumentCreateEntity<MyDoc> updated = documentApi.createDocument(docB,
                 DocumentCreateOptions.builder()
                         .waitForSync(true)
@@ -239,12 +239,12 @@ public class ArangoDocumentTest {
 
         MyDoc docA = new MyDoc();
         docA.key = "key-" + UUID.randomUUID().toString();
-        docA.data = Map.of("k1", "v1A");
+        docA.data = Collections.singletonMap("k1", "v1A");
         DocumentCreateEntity<MyDoc> created = documentApi.createDocument(docA);
 
         MyDoc docB = new MyDoc();
         docB.key = docA.key;
-        docB.data = Map.of("k1", "v1B");
+        docB.data = Collections.singletonMap("k1", "v1B");
         DocumentCreateEntity<MyDoc> updated = documentApi.createDocument(docB,
                 DocumentCreateOptions.builder()
                         .waitForSync(false)
@@ -255,7 +255,7 @@ public class ArangoDocumentTest {
 
         assertThat(updated.getId()).isEqualTo(documentApi.collection().getName() + "/" + docB.key);
         assertThat(updated.getKey()).isEqualTo(docB.key);
-        assertThat(updated.getRev()).isNotNull();
+        assertThat(updated.getRev()).isEqualTo(created.getRev());
         assertThat(updated.getOldRev()).isNull();
         assertThat(updated.getNew()).isNull();
         assertThat(updated.getOld()).isNull();
@@ -266,7 +266,7 @@ public class ArangoDocumentTest {
     void getDocumentHeader(ArangoDocumentSync documentApi) {
         MyDoc docA = new MyDoc();
         docA.key = "key-" + UUID.randomUUID().toString();
-        docA.data = Map.of("k1", "v1A");
+        docA.data = Collections.singletonMap("k1", "v1A");
         DocumentCreateEntity<MyDoc> created = documentApi.createDocument(docA);
         DocumentEntity head = documentApi.getDocumentHeader(docA.key);
         assertThat(head.getId()).isEqualTo(created.getId());
@@ -275,10 +275,10 @@ public class ArangoDocumentTest {
     }
 
     @ArangoApiTest
-    void getDocumentHeadMatch(ArangoDocumentSync documentApi) {
+    void getDocumentHeadMatch(TestContext ctx, ArangoDocumentSync documentApi) {
         MyDoc docA = new MyDoc();
         docA.key = "key-" + UUID.randomUUID().toString();
-        docA.data = Map.of("k1", "v1A");
+        docA.data = Collections.singletonMap("k1", "v1A");
         DocumentCreateEntity<MyDoc> created = documentApi.createDocument(docA);
 
         DocumentEntity matchingHead = documentApi.getDocumentHeader(docA.key, DocumentReadOptions.builder()
@@ -291,10 +291,13 @@ public class ArangoDocumentTest {
                 .getDocumentHeader(docA.key, DocumentReadOptions.builder().ifMatch("nonMatchingEtag").build()));
 
         assertThat(matchingHeadFail).isNotNull();
-        assertThat(matchingHeadFail).isInstanceOf(PreconditionFailedException.class);
-        ArangoServerException matchingHeadEx = (ArangoServerException) matchingHeadFail;
-        assertThat(matchingHeadEx.getResponseCode()).isEqualTo(412);
-        assertThat(matchingHeadEx.getEntity()).isNotPresent();
+
+        // FIXME: https://arangodb.atlassian.net/browse/BTS-317
+        if (ctx.isAtLeastVersion(3, 7)) {
+            assertThat(matchingHeadFail).isInstanceOf(PreconditionFailedException.class);
+            assertThat(((ArangoServerException) matchingHeadFail).getEntity()).isNotPresent();
+        }
+        assertThat(((ArangoServerException) matchingHeadFail).getResponseCode()).isEqualTo(412);
 
         DocumentEntity noneMatchingHead = documentApi.getDocumentHeader(docA.key, DocumentReadOptions.builder()
                 .ifNoneMatch("nonMatchingEtag").build());

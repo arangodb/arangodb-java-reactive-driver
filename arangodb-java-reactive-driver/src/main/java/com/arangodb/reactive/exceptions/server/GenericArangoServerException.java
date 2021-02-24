@@ -23,7 +23,7 @@ package com.arangodb.reactive.exceptions.server;
 import com.arangodb.reactive.entity.GeneratePackagePrivateBuilder;
 
 /**
- * ArangoServerException representing an unknown (not typed) server error.
+ * ArangoServerException representing an unknown (unspecialized) server error.
  *
  * @author Michele Rastelli
  */

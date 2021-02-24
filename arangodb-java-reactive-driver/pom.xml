@@ -239,8 +239,9 @@
                     <showWarnings>true</showWarnings>
                     <source>1.8</source>
                     <target>1.8</target>
-                    <testSource>11</testSource>
-                    <testTarget>11</testTarget>
+<!--                    FIXME: https://youtrack.jetbrains.com/issue/IDEA-85478-->
+<!--                    <testSource>11</testSource>-->
+<!--                    <testTarget>11</testTarget>-->
                 </configuration>
             </plugin>
         </plugins>
