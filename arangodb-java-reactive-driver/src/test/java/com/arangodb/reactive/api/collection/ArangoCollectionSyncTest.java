@@ -40,6 +40,8 @@ import com.arangodb.reactive.api.sync.ThreadConversation;
 import com.arangodb.reactive.api.utils.ArangoApiTest;
 import com.arangodb.reactive.api.utils.ArangoApiTestClass;
 import com.arangodb.reactive.api.utils.TestContext;
+import com.arangodb.reactive.exceptions.server.AlreadyExistingException;
+import com.arangodb.reactive.exceptions.server.CollectionOrViewNotFoundException;
 
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +50,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
@@ -340,6 +343,20 @@ class ArangoCollectionSyncTest {
         database.createCollection(CollectionCreateOptions.builder().name(name).build());
         ArangoCollectionSync collection = database.collection(name);
         collection.unload();
+    }
+
+    @ArangoApiTest
+    void collectionNotFound(ArangoDatabaseSync database) {
+        Throwable thrown = catchThrowable(() -> database.collection("nonExistingCollection").info());
+        assertThat(thrown).isInstanceOf(CollectionOrViewNotFoundException.class);
+    }
+
+    @ArangoApiTest
+    void alreadyExistingCollection(ArangoDatabaseSync database, ArangoCollectionSync collection) {
+        Throwable thrown = catchThrowable(() -> database.createCollection(CollectionCreateOptions.builder()
+                .name(collection.getName())
+                .build()));
+        assertThat(thrown).isInstanceOf(AlreadyExistingException.class);
     }
 
 }

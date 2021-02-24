@@ -26,7 +26,7 @@ import com.arangodb.codegen.SyncApiIgnore;
 import com.arangodb.reactive.api.database.ArangoDatabase;
 import com.arangodb.reactive.api.database.options.DatabaseCreateOptions;
 import com.arangodb.reactive.api.reactive.ArangoClient;
-import com.arangodb.reactive.exceptions.server.AlreadyExistingDatabaseException;
+import com.arangodb.reactive.exceptions.server.AlreadyExistingException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -88,7 +88,7 @@ public interface ArangoDB extends ArangoClient {
      *         Name of the database to create
      * @return a Mono completing on operation completion
      *
-     * @throws AlreadyExistingDatabaseException
+     * @throws AlreadyExistingException
      *         if a database with the specified name already exists
      * @see <a href="https://www.arangodb.com/docs/stable/http/database-database-management.html#create-database">API
      * Documentation</a>
@@ -103,7 +103,7 @@ public interface ArangoDB extends ArangoClient {
      *         Creation options
      * @return a Mono completing on operation completion
      *
-     * @throws AlreadyExistingDatabaseException
+     * @throws AlreadyExistingException
      *         if a database with the specified name already exists
      * @see <a href="https://www.arangodb.com/docs/stable/http/database-database-management.html#create-database">API
      * Documentation</a>

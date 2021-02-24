@@ -29,7 +29,7 @@ import com.arangodb.reactive.entity.GeneratePackagePrivateBuilder;
  * {
  * "code":409,
  * "error":true,
- * "errorMessage":"duplicate database name `...`",
+ * "errorMessage":"duplicate database/collection name `...`",
  * "errorNum":1207
  * }
  * </code>
@@ -37,6 +37,6 @@ import com.arangodb.reactive.entity.GeneratePackagePrivateBuilder;
  * @author Michele Rastelli
  */
 @GeneratePackagePrivateBuilder
-public abstract class AlreadyExistingDatabaseException extends ArangoServerException {
+public abstract class AlreadyExistingException extends ArangoServerException {
     static final int ERROR_NUM = 1207;
 }

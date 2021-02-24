@@ -32,7 +32,7 @@ import com.arangodb.reactive.api.utils.SystemDBOnly;
 import com.arangodb.reactive.api.utils.TestContext;
 import com.arangodb.reactive.exceptions.server.ArangoServerException;
 import com.arangodb.reactive.exceptions.server.DatabaseNotFoundException;
-import com.arangodb.reactive.exceptions.server.AlreadyExistingDatabaseException;
+import com.arangodb.reactive.exceptions.server.AlreadyExistingException;
 
 import java.util.List;
 import java.util.UUID;
@@ -175,7 +175,7 @@ class ArangoDatabaseSyncTest {
     @ArangoApiTest
     void createDatabaseAlreadyExisting(ArangoDBSync arangoDB, ArangoDatabaseSync arangoDatabaseSync) {
         Throwable thrown = catchThrowable(() -> arangoDB.createDatabase(arangoDatabaseSync.getName()));
-        assertThat(thrown).isInstanceOf(AlreadyExistingDatabaseException.class);
+        assertThat(thrown).isInstanceOf(AlreadyExistingException.class);
     }
 
 

@@ -62,8 +62,8 @@ public abstract class ArangoServerException extends ArangoException {
                         .responseCode(responseCode)
                         .entity(errorEntity)
                         .build();
-            case AlreadyExistingDatabaseException.ERROR_NUM:
-                return new AlreadyExistingDatabaseExceptionBuilder()
+            case AlreadyExistingException.ERROR_NUM:
+                return new AlreadyExistingExceptionBuilder()
                         .responseCode(responseCode)
                         .entity(errorEntity)
                         .build();

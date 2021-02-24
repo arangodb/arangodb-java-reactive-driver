@@ -39,8 +39,10 @@ public class RootOnlyExecutionCondition implements ExecutionCondition {
         if (context.getTestMethod().get().isAnnotationPresent(SystemDBOnly.class)) {
             TestTemplateInvocationContext ic = getInvocationContext(context);
             if (ic instanceof ArangoApiTestTemplateInvocationContextProvider.InvocationContext) {
-                if (!"_system".equals(((ArangoApiTestTemplateInvocationContextProvider.InvocationContext) ic).getAdminDB()))
-                    return ConditionEvaluationResult.disabled("@SystemDBOnly: test disabled.");
+                String adminDB = ((ArangoApiTestTemplateInvocationContextProvider.InvocationContext) ic).getAdminDB();
+                if (!"_system".equals(adminDB)) {
+                    return ConditionEvaluationResult.disabled("@SystemDBOnly: test disabled for adminDB: " + adminDB);
+                }
             }
         }
         return ConditionEvaluationResult.enabled("No @SystemDBOnly annotation found, test enabled.");
