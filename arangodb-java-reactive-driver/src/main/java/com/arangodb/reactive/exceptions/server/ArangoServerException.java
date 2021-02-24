@@ -33,6 +33,7 @@ public abstract class ArangoServerException extends ArangoException {
     public static ArangoServerException of(final int responseCode, final ErrorEntity errorEntity) {
 
         // Server Exceptions without body response (eg. returned from HEAD methods)
+        // FIXME: use generic builder
         if (errorEntity == null) {
             switch (responseCode) {
                 case NotModifiedException.RESPONSE_CODE:
@@ -54,7 +55,13 @@ public abstract class ArangoServerException extends ArangoException {
             }
         }
 
+        // FIXME: use generic builder
         switch (errorEntity.getErrorNum()) {
+            case DatabaseNotFoundException.ERROR_NUM:
+                return new DatabaseNotFoundExceptionBuilder()
+                        .responseCode(responseCode)
+                        .entity(errorEntity)
+                        .build();
             case CollectionOrViewNotFoundException.ERROR_NUM:
                 return new CollectionOrViewNotFoundExceptionBuilder()
                         .responseCode(responseCode)

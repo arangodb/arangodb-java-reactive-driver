@@ -31,6 +31,7 @@ import com.arangodb.reactive.api.utils.ArangoApiTestClass;
 import com.arangodb.reactive.api.utils.SystemDBOnly;
 import com.arangodb.reactive.api.utils.TestContext;
 import com.arangodb.reactive.exceptions.server.ArangoServerException;
+import com.arangodb.reactive.exceptions.server.DatabaseNotFoundException;
 
 import java.util.List;
 import java.util.UUID;
@@ -150,6 +151,22 @@ class ArangoDatabaseSyncTest {
         List<String> databases = arangoDB.accessibleDatabases();
         assertThat(databases).isNotNull();
         assertThat(databases).contains(arangoDB.getAdminDB());
+    }
+
+
+    @SystemDBOnly
+    @ArangoApiTest
+    void dropDatabaseNotFound(ArangoDBSync arangoDB) {
+        Throwable thrown = catchThrowable(() -> arangoDB.db("nonExistingDb").drop());
+        assertThat(thrown).isInstanceOf(DatabaseNotFoundException.class);
+    }
+
+
+    @SystemDBOnly
+    @ArangoApiTest
+    void infoDatabaseNotFound(ArangoDBSync arangoDB) {
+        Throwable thrown = catchThrowable(() -> arangoDB.db("nonExistingDb").info());
+        assertThat(thrown).isInstanceOf(DatabaseNotFoundException.class);
     }
 
 }

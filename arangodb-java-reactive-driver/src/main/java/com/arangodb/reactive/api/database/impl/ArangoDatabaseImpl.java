@@ -21,6 +21,7 @@
 package com.arangodb.reactive.api.database.impl;
 
 
+import com.arangodb.reactive.ArangoDefaults;
 import com.arangodb.reactive.api.arangodb.ArangoDB;
 import com.arangodb.reactive.api.collection.ArangoCollection;
 import com.arangodb.reactive.api.collection.entity.DetailedCollectionEntity;
@@ -90,7 +91,7 @@ public final class ArangoDatabaseImpl extends ArangoClientImpl implements Arango
     public Mono<Void> drop() {
         return getCommunication().execute(
                 ArangoRequest.builder()
-                        .database(adminDB)
+                        .database(ArangoDefaults.SYSTEM_DB)
                         .requestType(ArangoRequest.RequestType.DELETE)
                         .path(ApiPath.DATABASE + "/" + name)
                         .build()

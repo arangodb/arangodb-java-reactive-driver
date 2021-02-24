@@ -23,8 +23,6 @@ package com.arangodb.reactive.api.arangodb;
 import com.arangodb.codegen.GenerateSyncApi;
 import com.arangodb.codegen.SyncApiDelegator;
 import com.arangodb.codegen.SyncApiIgnore;
-import com.arangodb.reactive.ArangoConfig;
-import com.arangodb.reactive.api.arangodb.impl.ArangoDBImpl;
 import com.arangodb.reactive.api.database.ArangoDatabase;
 import com.arangodb.reactive.api.database.options.DatabaseCreateOptions;
 import com.arangodb.reactive.api.reactive.ArangoClient;
@@ -37,10 +35,6 @@ import reactor.core.publisher.Mono;
  */
 @GenerateSyncApi
 public interface ArangoDB extends ArangoClient {
-
-    static ArangoDB create(final ArangoConfig config) {
-        return new ArangoDBImpl(config);
-    }
 
     /**
      * @return the name of the database used to perform administration requests

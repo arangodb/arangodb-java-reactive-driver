@@ -36,6 +36,7 @@ import reactor.core.publisher.Mono;
 
 /**
  * @author Michele Rastelli
+ * @see <a href="https://www.arangodb.com/docs/stable/http/database.html">API Documentation</a>
  */
 @GenerateSyncApi
 public interface ArangoDatabase extends ArangoClient {
@@ -54,8 +55,10 @@ public interface ArangoDatabase extends ArangoClient {
 
     /**
      * @return information about the database
-     * @see <a href=
-     * "https://www.arangodb.com/docs/stable/http/database-database-management.html#information-of-the-database">API
+     *
+     * @throws com.arangodb.reactive.exceptions.server.DatabaseNotFoundException
+     *         if the database could not be found
+     * @see <a href= "https://www.arangodb.com/docs/stable/http/database-database-management.html#information-of-the-database">API
      * Documentation</a>
      */
     Mono<DatabaseEntity> info();
@@ -64,6 +67,9 @@ public interface ArangoDatabase extends ArangoClient {
      * Deletes the database from the server.
      *
      * @return a Mono completing on operation completion
+
+     * @throws com.arangodb.reactive.exceptions.server.DatabaseNotFoundException
+     *         if the database could not be found
      * @see <a href="https://www.arangodb.com/docs/stable/http/database-database-management.html#drop-database">API
      * Documentation</a>
      */

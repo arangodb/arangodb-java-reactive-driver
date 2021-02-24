@@ -40,6 +40,7 @@ import java.util.Map;
 
 /**
  * @author Michele Rastelli
+ * @see <a href="https://www.arangodb.com/docs/stable/http/collection.html">API Documentation</a>
  */
 @GenerateSyncApi
 public interface ArangoCollection extends ArangoClient {
