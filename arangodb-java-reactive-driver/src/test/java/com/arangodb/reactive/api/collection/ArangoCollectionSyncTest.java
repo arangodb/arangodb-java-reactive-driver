@@ -282,19 +282,11 @@ class ArangoCollectionSyncTest {
     }
 
     @ArangoApiTest
-    void loadCollection(ArangoDatabaseSync database) {
-        String name = "collection-" + UUID.randomUUID().toString();
-        database.createCollection(CollectionCreateOptions.builder().name(name).build());
-        ArangoCollectionSync collection = database.collection(name);
-        collection.load();
-    }
-
-    @ArangoApiTest
     void loadCollectionIndexes(ArangoDatabaseSync database) {
         String name = "collection-" + UUID.randomUUID().toString();
         database.createCollection(CollectionCreateOptions.builder().name(name).build());
         ArangoCollectionSync collection = database.collection(name);
-        collection.load();
+        collection.loadIndexes();
     }
 
     @ArangoApiTest
@@ -335,14 +327,6 @@ class ArangoCollectionSyncTest {
         List<String> shards = collection.shards();
         assertThat(shards).isNotNull();
         assertThat(shards).isNotEmpty();
-    }
-
-    @ArangoApiTest
-    void unloadCollection(ArangoDatabaseSync database) {
-        String name = "collection-" + UUID.randomUUID().toString();
-        database.createCollection(CollectionCreateOptions.builder().name(name).build());
-        ArangoCollectionSync collection = database.collection(name);
-        collection.unload();
     }
 
     @ArangoApiTest

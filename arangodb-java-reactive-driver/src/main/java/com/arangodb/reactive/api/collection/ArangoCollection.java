@@ -155,16 +155,6 @@ public interface ArangoCollection extends ArangoClient {
     Mono<Map<String, Object>> statistics();
 
     /**
-     * Loads a collection into memory.
-     *
-     * @return a Mono completing on operation completion
-     * @see <a href=
-     * "https://www.arangodb.com/docs/stable/http/collection-modifying.html#load-collection">API
-     * Documentation</a>
-     */
-    Mono<Void> load();
-
-    /**
      * Loads a collection indexes into memory.
      *
      * @return a Mono completing on operation completion
@@ -220,13 +210,4 @@ public interface ArangoCollection extends ArangoClient {
      */
     Flux<String> shards();
 
-    /**
-     * Removes a collection from memory. This operation does not delete any document.
-     *
-     * @return a Mono completing on operation completion
-     * @see <a href=
-     * "https://www.arangodb.com/docs/stable/http/collection-modifying.html#unload-collection">API
-     * Documentation</a>
-     */
-    Mono<Void> unload();
 }

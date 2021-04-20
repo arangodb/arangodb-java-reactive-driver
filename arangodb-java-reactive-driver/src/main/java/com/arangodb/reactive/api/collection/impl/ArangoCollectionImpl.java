@@ -197,17 +197,6 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
     }
 
     @Override
-    public Mono<Void> load() {
-        return getCommunication()
-                .execute(ArangoRequest.builder()
-                        .database(database().getName())
-                        .requestType(ArangoRequest.RequestType.PUT)
-                        .path(ApiPath.COLLECTION + "/" + colName + "/load")
-                        .build())
-                .then();
-    }
-
-    @Override
     public Mono<Void> loadIndexes() {
         return getCommunication()
                 .execute(ArangoRequest.builder()
@@ -276,17 +265,6 @@ public final class ArangoCollectionImpl extends ArangoClientImpl implements Aran
                 .map(ArangoResponse::getBody)
                 .map(bytes -> getSerde().<List<String>>deserializeAtJsonPointer("/shards", bytes, STRING_LIST))
                 .flatMapMany(Flux::fromIterable);
-    }
-
-    @Override
-    public Mono<Void> unload() {
-        return getCommunication()
-                .execute(ArangoRequest.builder()
-                        .database(database().getName())
-                        .requestType(ArangoRequest.RequestType.PUT)
-                        .path(ApiPath.COLLECTION + "/" + colName + "/unload")
-                        .build())
-                .then();
     }
 
 }
