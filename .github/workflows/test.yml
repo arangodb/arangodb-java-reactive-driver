@@ -38,10 +38,8 @@ jobs:
         java-version:
           - 11
         docker-img:
-          - docker.io/arangodb/arangodb:3.6.11
-          - docker.io/arangodb/enterprise:3.6.11
-          - docker.io/arangodb/arangodb:3.7.6
-          - docker.io/arangodb/enterprise:3.7.6
+          - docker.io/arangodb/arangodb:3.7.10
+          - docker.io/arangodb/enterprise:3.7.10
 
     steps:
       - uses: actions/checkout@v1
